@@ -1,5 +1,10 @@
 require "bundler/setup"
-require "dumped_railers"
+
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
+require 'active_record_helper'
+
+require 'dumped_railers'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -5,9 +5,12 @@
 /doc/
 /pkg/
 /spec/reports/
-/tmp/
+**/*/tmp/
+.rubocop-*
 
 Gemfile.lock
+*.sqlite3
+*.log
 
 # rspec failure tracking
 .rspec_status
