@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 12.3.3'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'sqlite3'
-  spec.add_development_dependency 'activerecord', '~> 6.0'
+  spec.add_development_dependency 'activerecord', '~> 5.2'
   spec.add_development_dependency 'database_cleaner-active_record', '~> 1.8'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'pry-byebug'
