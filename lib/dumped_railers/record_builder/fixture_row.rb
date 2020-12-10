@@ -15,12 +15,12 @@ module DumpedRailers
 
         @dependency =  dependency_tracker
 
-        attrs.each do |attr, label|
-          label, model_name = parse_reference_from(label)
-          next unless label
+        attrs.each do |attr, value|
+          ref, model_name = parse_reference_from(value)
+          next unless ref
   
-          attrs[attr] = label.to_sym
-          @dependency.with(attr).record_label = label.to_sym
+          attrs[attr] = ref.to_sym
+          @dependency.with(attr).record_label = ref.to_sym
           @dependency.with(attr).model_name   = model_name&.to_sym
         end
       end
@@ -38,17 +38,17 @@ module DumpedRailers
   
       private
   
-      def parse_reference_from(label)
+      def parse_reference_from(val)
         # NOTE: make sure its object is a string (can be a json object)
-        return unless label.is_a? String
-        return unless label.start_with? '__'
+        return unless val.is_a? String
+        return unless val.start_with? '__'
   
         # format convention
         # for non-polymorphic association: __[identifier]
         # for polymorphic association:     __[identifier]([model_name])
-        label, _, model_name = label.scan(/\A(__[\w]+)(\(([^)]+)\))?\z/).first
+        ref, _, model_name = val.scan(/\A(__[^(\s]+)(\(([^)]+)\))?\z/).first
   
-        [label, model_name]
+        [ref, model_name]
       end
   
       def resolve_reference!

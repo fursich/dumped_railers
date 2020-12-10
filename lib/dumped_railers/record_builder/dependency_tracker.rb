@@ -63,7 +63,7 @@ module DumpedRailers
         end
 
         def dependent_record_labels
-          record_dependency.values.map(&:record_label)
+          record_dependency.values.map(&:record_label).compact
         end
 
         private
