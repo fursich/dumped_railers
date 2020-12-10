@@ -1,0 +1,48 @@
+---
+_fixture:
+  model_class: ContentHolder
+  fixture_generated_by: DumpedRailers
+__content_holder_5:
+  article: __article_52
+  content: __text_content_221(TextContent)
+__content_holder_4:
+  article: __article_143
+  content: __picture_content_7(PictureContent)
+__content_holder_3:
+  article: __article_88
+  content: __text_content_916(TextContent)
+__content_holder_83:
+  article: __article_88
+  content: __text_content_98(TextContent)
+__content_holder_22:
+  article: __article_143
+  content: __text_content_27(TextContent)
+__content_holder_321:
+  article: __article_36
+  content: __text_content_18(TextContent)
+__content_holder_13:
+  article: __article_53
+  content: __text_content_301(TextContent)
+__content_holder_74:
+  article: __article_215
+  content: __video_content_57(VideoContent)
+__content_holder_78:
+  article: __article_243
+  content: __video_content_9(VideoContent)
+__content_holder_9:
+  article: __article_52
+  content: __video_content_191(VideoContent)
+__content_holder_320:
+  article: __article_36
+  content: __picture_content_139(PictureContent)
+__content_holder_87:
+  content: __text_content_73(TextContent)
+__content_holder_55:
+  content: __picture_content_90(PictureContent)
+__content_holder_93:
+  article: __article_143
+  content: __text_content_53(TextContent)
+__content_holder_813:
+  article: __article_102
+  content: __text_content_25(TextContent)
+

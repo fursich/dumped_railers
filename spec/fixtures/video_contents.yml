@@ -1,0 +1,22 @@
+---
+_fixture:
+  model_class: VideoContent
+  fixture_generated_by: DumpedRailers
+__video_content_57:
+  file:
+    url: https://example.com/storage/peter_pan/9382sjdf8.mp4
+    metadata:
+      size: 9178348
+      filename: peter_and_wendy.mp4
+__video_content_191:
+  file:
+    url: https://example.com/storage/harry_potter/e9128347l.mp4
+    metadata:
+      size: 41735021
+      filename: hogwarts.mp4
+__video_content_9:
+  file:
+    url: https://example.com/storage/spritted_away/i012387413a.mp4
+    metadata:
+      size: 9747403
+      filename: yubaba.mp4

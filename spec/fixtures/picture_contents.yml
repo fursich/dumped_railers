@@ -1,0 +1,22 @@
+---
+_fixture:
+  model_class: PictureContent
+  fixture_generated_by: DumpedRailers
+__picture_content_90:
+  file:
+    url: https://example.com/storage/the_hobbit/98x45672a.jpg
+    metadata:
+      size: 193450
+      filename: hobit.jpg
+__picture_content_7:
+  file:
+    url: https://example.com/storage/princess_mononoke/98q3r28289s.png
+    metadata:
+      size: 1230890
+      filename: haku.png
+__picture_content_139:
+  file:
+    url: https://example.com/storage/phoenix/98m298sm912.jpg
+    metadata:
+      size: 823890
+      filename: phoenix.jpg

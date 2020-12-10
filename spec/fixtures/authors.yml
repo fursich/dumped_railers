@@ -1,0 +1,15 @@
+---
+_fixture:
+  model_class: Author
+  fixture_generated_by: DumpedRailers
+__author_5:
+  name: Osamu Tezuka
+__author_4:
+  name: J. K. Rowling
+__author_13:
+  name: Hayao Miyazaki
+__author_83:
+  name: Walt Disney
+__author_22:
+  name: John Ronald Reuel Tolkien
+
