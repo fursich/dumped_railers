@@ -46,7 +46,7 @@ module DumpedRailers
         # format convention
         # for non-polymorphic association: __[identifier]
         # for polymorphic association:     __[identifier]([model_name])
-        ref, _, model_name = val.scan(/\A(__[^(\s]+)(\(([^)]+)\))?\z/).first
+        ref, _, model_name = val.scan(/\A(__[^(]+)(\(([^)]+)\))?\z/).first
   
         [ref, model_name]
       end
