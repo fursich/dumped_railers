@@ -1,4 +1,5 @@
-# DumpedRailers
+# DumpedRailers    <img src='https://user-images.githubusercontent.com/23026542/101830310-aaf10000-3b77-11eb-9e0a-d14e45b27760.png' width=40>
+[![Build Status](https://travis-ci.com/fursich/dumped_railers.svg?branch=main)](https://travis-ci.com/fursich/dumped_railers) [![Gem Version](https://badge.fury.io/rb/dumped_railers.svg)](https://badge.fury.io/rb/dumped_railers)
 
 Helping you take a snapshot of ActiveRecord models in Rails-compatible fixture format, and re-importing them wherever necessary without destroying current data you have.
 
@@ -144,6 +145,9 @@ class Egg < ActiveRecord::Base
   belongs_to :chicken, optional: true
 end
 ```
+
+* When exception raised, checking your log might give you a good hint (desperately staring at the backtrace won't give much information)
+  consider displaying `tail -f logs/development.log` while executing your script.
 
 ## Development
 
