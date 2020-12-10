@@ -6,13 +6,11 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Koji Onishi']
   spec.email         = ['fursich0@gmail.com']
 
-  spec.summary       = %q{A flexible fixture importer/exporter, that can transport related records into other databases }
-  # spec.description   = %q{TODO: Write a longer description or delete this line.}
+  spec.summary       = %q{A flexible fixture importer/exporter, that can transport ActiveRecord data in fixture format}
+  spec.description   = %q{DumpedRailers helps you take a snapshot of ActiveRecord models in Rails-compatible fixture format, and re-import them wherever necessary without destroying current data you have.}
   spec.homepage      = 'https://github.com/fursich/dumped_railers'
   spec.license       = 'MIT'
   spec.required_ruby_version = Gem::Requirement.new('>= 2.3.0')
-
-  spec.metadata['allowed_push_host'] = 'TODO: Set to http://mygemserver.com'
 
   spec.metadata['homepage_uri'] = spec.homepage
   spec.metadata['source_code_uri'] = 'https://github.com/fursich/dumped_railers'
