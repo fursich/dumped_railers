@@ -22,4 +22,7 @@
 - Cope with relations that has different name with the actual class name
   (e.g. associations defined using `:class_name` and `:foreign_key` options)
 
-
+## [0.1.4]
+### Changed
+- Update documents not to eagerload DumpedRailers to prevent accidental data breakage / leakage.
+  To activate, it is preferable to require explicitly where necessary.
