@@ -22,7 +22,10 @@ This feature can particularily help you in the following senarios:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'dumped_railers'
+# if you use this gem in production, `require: false` would be recommended
+# to prevent accidental database leakage/breakage.
+
+gem 'dumped_railers', require: false
 ```
 
 And then execute:
@@ -37,7 +40,13 @@ Or install it yourself as:
 
 ### Getting Started
 
-* if you want to dump (let's say) User, Item, and Tag models, just run the following.
+* Require dumped_railers where necessary (e.g. in your rake tasks, or script files)
+
+```ruby
+require 'dumped_railers'
+```
+
+* if you want to dump records from (let's say) User, Item, and Tag, just run the following.
 
 ```ruby
 DumpedRailers.dump!(User, Item, Tag, base_dir: 'tmp/fixtures/')
@@ -146,8 +155,12 @@ class Egg < ActiveRecord::Base
 end
 ```
 
-* When exception raised, checking your log might give you a good hint (desperately staring at the backtrace won't give much information)
+* For the same reason, self-associated model cannot be imported currently. (might be updated in the future version)
+
+* When an exception was raised, checking your log might give you a good hint (desperately staring at the backtrace won't give much information)
   consider displaying `tail -f logs/development.log` while executing your script.
+
+* DumpedRailers is tested against various association types, as long as target models and underlying tables have 1-on-1 mapping (straightforward ActiveRecord pattern). Currently we haven't test this against STI, CTI, as such. Applying this gem to such models might lead to some unexpected results.
 
 ## Development
 
