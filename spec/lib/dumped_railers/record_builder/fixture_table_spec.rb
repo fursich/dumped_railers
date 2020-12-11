@@ -134,15 +134,15 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureTable do
           },
           '__article_1' => {
             'title' => 'A Spring View',
-            'author' => '__author_1'
+            'writer' => '__author_1'
           },
           '__article_2' => {
             'title' => 'The Art of War',
-            'author' => '__author_2'
+            'writer' => '__author_2'
           },
           '__article_3' => {
             'title' => 'To My Retired Friend Wei',
-            'author' => '__author_1'
+            'writer' => '__author_1'
           },
         }
       }
@@ -264,15 +264,15 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureTable do
           },
           '__article_1' => {
             'title' => 'A Spring View',
-            'author' => '__author_1'
+            'writer' => '__author_1'
           },
           '__article_2' => {
             'title' => 'The Art of War',
-            'author' => '__author_2'
+            'writer' => '__author_2'
           },
           '__article_3' => {
             'title' => 'To My Retired Friend Wei',
-            'author' => '__author_1'
+            'writer' => '__author_1'
           },
         }
       }
@@ -332,19 +332,19 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureTable do
           it 'has attributes specified in the fixture' do
             expect(subject.first).to have_attributes(
               title: 'A Spring View',
-              author: have_attributes(
+              writer: have_attributes(
                 name: 'Du Fu'
               ),
             )
             expect(subject.second).to have_attributes(
               title: 'The Art of War',
-              author: have_attributes(
+              writer: have_attributes(
                 name: 'Sun Tsu'
               ),
             )
             expect(subject.last).to have_attributes(
               title: 'To My Retired Friend Wei',
-              author: have_attributes(
+              writer: have_attributes(
                 name: 'Du Fu'
               ),
             )
@@ -468,11 +468,11 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureTable do
           },
           '__article_1' => {
             'title' => 'A Spring View',
-            'author' => '__author_1'
+            'writer' => '__author_1'
           },
           '__article_2' => {
             'title' => 'The Art of War',
-            'author' => '__author_2'
+            'writer' => '__author_2'
           },
         }
       }

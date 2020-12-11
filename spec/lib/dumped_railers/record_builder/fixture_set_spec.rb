@@ -26,19 +26,19 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureSet do
       },
       '__article_1' => {
         'title' => 'The Classical Theory of Fields',
-        'author' => '__author_2'
+        'writer' => '__author_2'
       },
       '__article_2' => {
         'title' => 'The Computer and the Brain',
-        'author' => '__author_3'
+        'writer' => '__author_3'
       },
       '__article_3' => {
         'title' => 'Modern Quantum Mechanics',
-        'author' => '__author_1'
+        'writer' => '__author_1'
       },
       '__article_4' => {
         'title' => 'Theory of Games and Economic Behavior',
-        'author' => '__author_3'
+        'writer' => '__author_3'
       },
     }
   }
@@ -157,25 +157,25 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureSet do
         Article => a_collection_containing_exactly(
           have_attributes(
             title: 'The Classical Theory of Fields',
-            author: have_attributes(
+            writer: have_attributes(
               name: 'Lev Landau'
             )
           ),
           have_attributes(
             title: 'The Computer and the Brain',
-            author: have_attributes(
+            writer: have_attributes(
               name: 'John von Neumann'
             )
           ),
           have_attributes(
             title: 'Modern Quantum Mechanics',
-            author: have_attributes(
+            writer: have_attributes(
               name: 'J. J. Sakurai'
             )
           ),
           have_attributes(
             title: 'Theory of Games and Economic Behavior',
-            author: have_attributes(
+            writer: have_attributes(
               name: 'John von Neumann'
             )
           ),

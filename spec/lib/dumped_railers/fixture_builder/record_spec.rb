@@ -40,21 +40,21 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
 
       context 'when the record has a direct reference (using primary_key)' do
         let(:author) { Author.create!(name: 'Edgar Allan Poe') }
-        let(:record) { Article.create!(title: 'The Murders in the Rue Morgue', author: author) }
+        let(:record) { Article.create!(title: 'The Murders in the Rue Morgue', writer: author) }
         let(:model)  { Article }
   
         it {
           is_expected.to match(
             'id'     => record.id,
             'title'  => 'The Murders in the Rue Morgue',
-            'author' => "__author_#{author.id}"
+            'writer' => "__author_#{author.id}"
           )
         }
       end
 
       context 'when the record has a polymorpic reference' do
         let(:author)          { Author.create!(name: 'Edgar Allan Poe') }
-        let(:article)         { Article.create!(title: 'The Murders in the Rue Morgue', author: author) }
+        let(:article)         { Article.create!(title: 'The Murders in the Rue Morgue', writer: author) }
         let(:record)          { ContentHolder.create!(content: pixture_content, article: article) }
         let(:pixture_content) { PictureContent.create!(file: { path: 'foo/bar', filename: 'baz.jpg' }) }
         let(:model)           { ContentHolder }

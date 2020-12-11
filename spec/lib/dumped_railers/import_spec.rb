@@ -41,49 +41,49 @@ RSpec.describe DumpedRailers::Import do
       expect(Article.all).to contain_exactly(
         have_attributes(
           title: 'Harry Potter',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'J. K. Rowling'
           ),
         ),
         have_attributes(
           title: 'Princess Mononoke',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Sprited Away',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Alice in Wonderland',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'Peter Pan',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'The Lord of the Rings',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'John Ronald Reuel Tolkien'
           ),
         ),
         have_attributes(
           title: 'Phoenix',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),
         have_attributes(
           title: 'Black Jack',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),
@@ -146,49 +146,49 @@ RSpec.describe DumpedRailers::Import do
       expect(Article.all).to contain_exactly(
         have_attributes(
           title: 'Harry Potter',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'J. K. Rowling'
           ),
         ),
         have_attributes(
           title: 'Princess Mononoke',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Sprited Away',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Alice in Wonderland',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'Peter Pan',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'The Lord of the Rings',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'John Ronald Reuel Tolkien'
           ),
         ),
         have_attributes(
           title: 'Phoenix',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),
         have_attributes(
           title: 'Black Jack',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),

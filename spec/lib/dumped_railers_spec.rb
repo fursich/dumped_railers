@@ -5,9 +5,9 @@ RSpec.describe DumpedRailers do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
     let!(:author2)  { Author.create!(name: 'Shikibu Murasaki') }
-    let!(:article1) { Article.create!(title: 'Romeo and Juliet', author: author1) }
-    let!(:article2) { Article.create!(title: 'King Lear',        author: author1) }
-    let!(:article3) { Article.create!(title: 'Genji Monogatari', author: author2) }
+    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1) }
+    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
+    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
     let(:models)    { [Author, Article] }
 
     context 'with default settings' do
@@ -63,15 +63,15 @@ RSpec.describe DumpedRailers do
                 },
               "__article_#{article1.id}" => {
                 'title'  => article1.title,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article2.id}" => {
                 'title'  => article2.title,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article3.id}" => {
                 'title'  => article3.title,
-                'author' => "__author_#{author2.id}",
+                'writer' => "__author_#{author2.id}",
               },
             }
           )
@@ -144,17 +144,17 @@ RSpec.describe DumpedRailers do
               "__article_#{article1.id}" => {
                 'id' => article1.id,
                 'title'  => article1.title,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article2.id}" => {
                 'id' => article2.id,
                 'title'  => article2.title,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article3.id}" => {
                 'id' => article3.id,
                 'title'  => article3.title,
-                'author' => "__author_#{author2.id}",
+                'writer' => "__author_#{author2.id}",
               },
             }
           )
@@ -231,15 +231,15 @@ RSpec.describe DumpedRailers do
                 },
               "__article_#{article1.id}" => {
                 'upcased_title'  => article1.title.upcase,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article2.id}" => {
                 'upcased_title'  => article2.title.upcase,
-                'author' => "__author_#{author1.id}",
+                'writer' => "__author_#{author1.id}",
               },
               "__article_#{article3.id}" => {
                 'upcased_title'  => article3.title.upcase,
-                'author' => "__author_#{author2.id}",
+                'writer' => "__author_#{author2.id}",
               },
             }
           )
@@ -270,9 +270,9 @@ RSpec.describe DumpedRailers do
       it 'doubles the Article records that shares the same title and author name' do
         subject
 
-        expect(Article.joins(:author).where(title: article1.title, authors: { name: author1.name } ).count).to eq 2
-        expect(Article.joins(:author).where(title: article2.title, authors: { name: author1.name } ).count).to eq 2
-        expect(Article.joins(:author).where(title: article3.title, authors: { name: author2.name } ).count).to eq 2
+        expect(Article.joins(:writer).where(title: article1.title, authors: { name: author1.name } ).count).to eq 2
+        expect(Article.joins(:writer).where(title: article2.title, authors: { name: author1.name } ).count).to eq 2
+        expect(Article.joins(:writer).where(title: article3.title, authors: { name: author2.name } ).count).to eq 2
       end
     end
   end
@@ -313,49 +313,49 @@ RSpec.describe DumpedRailers do
       expect(Article.all).to contain_exactly(
         have_attributes(
           title: 'Harry Potter',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'J. K. Rowling'
           ),
         ),
         have_attributes(
           title: 'Princess Mononoke',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Sprited Away',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Hayao Miyazaki'
           ),
         ),
         have_attributes(
           title: 'Alice in Wonderland',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'Peter Pan',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Walt Disney'
           ),
         ),
         have_attributes(
           title: 'The Lord of the Rings',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'John Ronald Reuel Tolkien'
           ),
         ),
         have_attributes(
           title: 'Phoenix',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),
         have_attributes(
           title: 'Black Jack',
-          author: have_attributes(
+          writer: have_attributes(
             name: 'Osamu Tezuka'
           ),
         ),

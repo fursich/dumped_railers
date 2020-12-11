@@ -20,18 +20,18 @@ module DumpedRailers
         @model.reflect_on_all_associations.select(&:belongs_to?).each do |rel|
           # skip ignorables
           next unless attributes.has_key? rel.foreign_key.to_s
-  
+
           if rel.polymorphic?
-            model_name = attributes[rel.foreign_type.to_s]
-  
+            class_name = attributes[rel.foreign_type.to_s]
+
             attributes[rel.name.to_s] = record_label_for(
-              model_name,
+              class_name,
               attributes.delete(rel.foreign_key.to_s),
               attributes.delete(rel.foreign_type.to_s)
             )
           else
             attributes[rel.name.to_s] = record_label_for(
-              rel.name,
+              rel.class_name,
               attributes.delete(rel.foreign_key.to_s)
             )
           end
@@ -42,10 +42,10 @@ module DumpedRailers
     
       private
   
-      def record_label_for(model_name, id, type=nil)
+      def record_label_for(class_name, id, type=nil)
         return nil unless id
 
-        identifier = "#{model_name.to_s.underscore}_#{id}"
+        identifier = "#{class_name.to_s.underscore}_#{id}"
         type_specifier = "(#{type})" if type
   
         "__#{identifier}#{type_specifier}"

@@ -28,11 +28,12 @@ end
 
 class Author  < ActiveRecord::Base
   has_many  :articles
+  has_many  :content_holders, through: :articles
   validates :name, presence: true
 end
 
 class Article < ActiveRecord::Base
-  belongs_to :author
+  belongs_to :writer, class_name: :Author, foreign_key: :author_id
   has_many :content_holders
 
   validates :title, presence: true

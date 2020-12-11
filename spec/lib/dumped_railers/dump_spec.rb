@@ -8,9 +8,9 @@ RSpec.describe DumpedRailers::Dump do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
     let!(:author2)  { Author.create!(name: 'Shikibu Murasaki') }
-    let!(:article1) { Article.create!(title: 'Romeo and Juliet', author: author1) }
-    let!(:article2) { Article.create!(title: 'King Lear',        author: author1) }
-    let!(:article3) { Article.create!(title: 'Genji Monogatari', author: author2) }
+    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1) }
+    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
+    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
     let(:models)    { [Author, Article] }
 
     let(:preprocessors) { [] }
@@ -43,17 +43,17 @@ RSpec.describe DumpedRailers::Dump do
          "__article_#{article1.id}" => {
             'id'     => article1.id,
             'title'  => article1.title,
-            'author' => "__author_#{author1.id}",
+            'writer' => "__author_#{author1.id}",
            },
          "__article_#{article2.id}" => {
             'id'     => article2.id,
             'title'  => article2.title,
-            'author' => "__author_#{author1.id}",
+            'writer' => "__author_#{author1.id}",
            },
          "__article_#{article3.id}" => {
             'id'     => article3.id,
             'title'  => article3.title,
-            'author' => "__author_#{author2.id}",
+            'writer' => "__author_#{author2.id}",
            },
         }
       )
