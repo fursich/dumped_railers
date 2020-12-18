@@ -16,8 +16,10 @@ module DumpedRailers
     end
 
     def persist_all!(base_dir)
-      FileUtils.mkdir_p(base_dir)
-      FileHelper.write(*@fixtures, base_dir: base_dir)
+      if base_dir
+        FileUtils.mkdir_p(base_dir)
+        FileHelper.write(*@fixtures, base_dir: base_dir)
+      end
     end
   end
 end

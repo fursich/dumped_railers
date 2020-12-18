@@ -59,4 +59,55 @@ RSpec.describe DumpedRailers::Dump do
       )
     }
   end
+
+  describe '#persist_all!' do
+    let(:fixture_generator) { described_class.new(*models, preprocessors: []) }
+    let!(:fixtures) { fixture_generator.build_fixtures! }
+
+    let!(:author1)  { Author.create!(name: 'William Shakespeare') }
+    let!(:author2)  { Author.create!(name: 'Shikibu Murasaki') }
+    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1) }
+    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
+    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
+    let(:models)    { [Author, Article] }
+
+    before do
+      allow(FileUtils).to receive(:mkdir_p)
+      allow(DumpedRailers::FileHelper).to receive(:write)
+    end
+
+    subject { fixture_generator.persist_all!(base_dir) }
+
+    context 'when base_dir is set' do
+      let(:base_dir) { '/foo/bar/baz' }
+
+      it 'creates the directory' do
+        subject
+
+        expect(FileUtils).to have_received(:mkdir_p).with(base_dir).once
+      end
+
+      it 'writes out fixtures into files' do
+        subject
+
+        expect(DumpedRailers::FileHelper).to have_received(:write).with(*fixtures, base_dir: base_dir).once
+      end
+    end
+
+    context 'when base_dir is nil' do
+      let(:base_dir) { nil }
+
+      it 'does not create the directory' do
+        subject
+
+        expect(FileUtils).not_to have_received(:mkdir_p)
+      end
+
+      it 'writes out fixtures into files' do
+        subject
+
+        expect(DumpedRailers::FileHelper).not_to have_received(:write)
+      end
+    end
+  end
 end

@@ -7,7 +7,12 @@ module DumpedRailers
     attr_reader :fixture_set
 
     def initialize(*paths)
-      @raw_fixtures = FileHelper.read_fixtures(*paths)
+      if (paths.first.is_a? Hash)
+        @raw_fixtures = paths.first.values
+      else
+        @raw_fixtures = FileHelper.read_fixtures(*paths)
+      end
+
       @fixture_set = RecordBuilder::FixtureSet.new(@raw_fixtures)
     end
 

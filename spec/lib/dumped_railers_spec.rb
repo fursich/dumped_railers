@@ -10,21 +10,62 @@ RSpec.describe DumpedRailers do
     let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
     let(:models)    { [Author, Article] }
 
+    describe 'returned values' do
+      subject { DumpedRailers.dump!(*models) }
+
+      it 'returns fixture data composed of record attributes by its model' do
+        expect(subject).to match(
+          'authors' => {
+            '_fixture' =>
+              {
+                'model_class'          => 'Author',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            "__author_#{author1.id}" => {
+              'name' => author1.name
+            },
+            "__author_#{author2.id}" => {
+              'name' => author2.name
+            },
+          },
+          'articles'  =>  {
+            '_fixture' =>
+              {
+                'model_class'          => 'Article',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            "__article_#{article1.id}" => {
+              'title'  => article1.title,
+              'writer' => "__author_#{author1.id}",
+            },
+            "__article_#{article2.id}" => {
+              'title'  => article2.title,
+              'writer' => "__author_#{author1.id}",
+            },
+            "__article_#{article3.id}" => {
+              'title'  => article3.title,
+              'writer' => "__author_#{author2.id}",
+            },
+          }
+        )
+      end
+    end
+
     context 'with default settings' do
       before do
         File.delete(*Dir['spec/tmp/*.yml'])
         DumpedRailers.dump!(*models, base_dir: 'spec/tmp')
       end
-  
+
       describe 'authors fixture' do
         let(:fixture_file) { 'spec/tmp/authors.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has the same attributes that the original records have' do
           expect(fixture).to match(
             {
@@ -46,13 +87,13 @@ RSpec.describe DumpedRailers do
 
       describe 'article fixture' do
         let(:fixture_file) { 'spec/tmp/articles.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has the same attributes that the original records have' do
           expect(fixture).to match(
             {
@@ -90,21 +131,21 @@ RSpec.describe DumpedRailers do
         # make sure that the remaining tests run under default settings
         DumpedRailers.configure_defaults!
       end
-  
+
       before do
         File.delete(*Dir['spec/tmp/*.yml'])
         DumpedRailers.dump!(*models, base_dir: 'spec/tmp')
       end
-  
+
       describe 'authors fixture' do
         let(:fixture_file) { 'spec/tmp/authors.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has the same attributes that the original records have' do
           expect(fixture).to match(
             {
@@ -126,13 +167,13 @@ RSpec.describe DumpedRailers do
 
       describe 'article fixture' do
         let(:fixture_file) { 'spec/tmp/articles.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has upcased attributes' do
           expect(fixture).to match(
             {
@@ -178,21 +219,21 @@ RSpec.describe DumpedRailers do
           }.to_h
         }
       }
-  
+
       before do
         File.delete(*Dir['spec/tmp/*.yml'])
         DumpedRailers.dump!(*models, base_dir: 'spec/tmp', preprocessors: [masking, upcasing])
       end
-  
+
       describe 'authors fixture' do
         let(:fixture_file) { 'spec/tmp/authors.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has masked attributes' do
           expect(fixture).to match(
             {
@@ -214,13 +255,13 @@ RSpec.describe DumpedRailers do
 
       describe 'article fixture' do
         let(:fixture_file) { 'spec/tmp/articles.yml' }
-  
+
         it 'is persisted' do
           expect(File.exist?(fixture_file))
         end
-  
+
         let(:fixture) { YAML.load_file(fixture_file) }
-  
+
         it 'has upcased attributes' do
           expect(fixture).to match(
             {
@@ -248,165 +289,278 @@ RSpec.describe DumpedRailers do
     end
 
     describe 'import after dump (populating the original records)' do
-      before do
-        File.delete(*Dir['spec/tmp/*.yml'])
-        DumpedRailers.dump!(*models, base_dir: 'spec/tmp')
+      context 'when imported via raw fixture data' do
+        let(:raw_fixtures) { DumpedRailers.dump!(*models) }
+
+        subject { DumpedRailers.import!(raw_fixtures) }
+
+        it 'populates the Author and Article records' do
+          expect { subject }.to change { Author.count }.from(2).to(4)
+            .and change { Article.count }.from(3).to(6)
+        end
+
+        it 'doubles the Author records that shares the same name' do
+          subject
+
+          expect(Author.where(name: author1.name).count).to eq 2
+          expect(Author.where(name: author2.name).count).to eq 2
+        end
+
+        it 'doubles the Article records that shares the same title and author name' do
+          subject
+
+          expect(Article.joins(:writer).where(title: article1.title, authors: { name: author1.name } ).count).to eq 2
+          expect(Article.joins(:writer).where(title: article2.title, authors: { name: author1.name } ).count).to eq 2
+          expect(Article.joins(:writer).where(title: article3.title, authors: { name: author2.name } ).count).to eq 2
+        end
       end
 
-      subject { DumpedRailers.import!('spec/tmp') }
-  
-      it 'populates the Author and Article records' do
-        expect { subject }.to change { Author.count }.from(2).to(4)
-          .and change { Article.count }.from(3).to(6)
-      end
+      context 'when imported via fixture files' do
+        before do
+          File.delete(*Dir['spec/tmp/*.yml'])
+          DumpedRailers.dump!(*models, base_dir: 'spec/tmp')
+        end
 
-      it 'doubles the Author records that shares the same name' do
-        subject
+        subject { DumpedRailers.import!('spec/tmp') }
 
-        expect(Author.where(name: author1.name).count).to eq 2
-        expect(Author.where(name: author2.name).count).to eq 2
-      end
+        it 'populates the Author and Article records' do
+          expect { subject }.to change { Author.count }.from(2).to(4)
+            .and change { Article.count }.from(3).to(6)
+        end
 
-      it 'doubles the Article records that shares the same title and author name' do
-        subject
+        it 'doubles the Author records that shares the same name' do
+          subject
 
-        expect(Article.joins(:writer).where(title: article1.title, authors: { name: author1.name } ).count).to eq 2
-        expect(Article.joins(:writer).where(title: article2.title, authors: { name: author1.name } ).count).to eq 2
-        expect(Article.joins(:writer).where(title: article3.title, authors: { name: author2.name } ).count).to eq 2
+          expect(Author.where(name: author1.name).count).to eq 2
+          expect(Author.where(name: author2.name).count).to eq 2
+        end
+
+        it 'doubles the Article records that shares the same title and author name' do
+          subject
+
+          expect(Article.joins(:writer).where(title: article1.title, authors: { name: author1.name } ).count).to eq 2
+          expect(Article.joins(:writer).where(title: article2.title, authors: { name: author1.name } ).count).to eq 2
+          expect(Article.joins(:writer).where(title: article3.title, authors: { name: author2.name } ).count).to eq 2
+        end
       end
     end
   end
 
   describe '.import!' do
-    subject { DumpedRailers.import!(*paths) }
-    let(:paths) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
+    context 'with fixture files' do
+      subject { DumpedRailers.import!(*paths) }
+      let(:paths) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
 
-    it 'generates corresponding records' do
-      expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
-    end
+      it 'generates corresponding records' do
+        expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
+      end
 
-    it 'generates author records' do
-      subject
+      it 'generates author records' do
+        subject
 
-      expect(Author.all).to contain_exactly(
-        have_attributes(
-          name: 'Osamu Tezuka'
-        ),
-        have_attributes(
-          name: 'J. K. Rowling'
-        ),
-        have_attributes(
-          name: 'Hayao Miyazaki'
-        ),
-        have_attributes(
-          name: 'Walt Disney'
-        ),
-        have_attributes(
-          name: 'John Ronald Reuel Tolkien'
-        ),
-      )
-    end
-
-    it 'generates article records with proper associations' do
-      subject
-
-      expect(Article.all).to contain_exactly(
-        have_attributes(
-          title: 'Harry Potter',
-          writer: have_attributes(
+        expect(Author.all).to contain_exactly(
+          have_attributes(
+            name: 'Osamu Tezuka'
+          ),
+          have_attributes(
             name: 'J. K. Rowling'
           ),
-        ),
-        have_attributes(
-          title: 'Princess Mononoke',
-          writer: have_attributes(
+          have_attributes(
             name: 'Hayao Miyazaki'
           ),
-        ),
-        have_attributes(
-          title: 'Sprited Away',
-          writer: have_attributes(
-            name: 'Hayao Miyazaki'
-          ),
-        ),
-        have_attributes(
-          title: 'Alice in Wonderland',
-          writer: have_attributes(
+          have_attributes(
             name: 'Walt Disney'
           ),
-        ),
-        have_attributes(
-          title: 'Peter Pan',
-          writer: have_attributes(
-            name: 'Walt Disney'
-          ),
-        ),
-        have_attributes(
-          title: 'The Lord of the Rings',
-          writer: have_attributes(
+          have_attributes(
             name: 'John Ronald Reuel Tolkien'
           ),
-        ),
-        have_attributes(
-          title: 'Phoenix',
-          writer: have_attributes(
-            name: 'Osamu Tezuka'
-          ),
-        ),
-        have_attributes(
-          title: 'Black Jack',
-          writer: have_attributes(
-            name: 'Osamu Tezuka'
-          ),
-        ),
-      )
-    end
-  end
-
-  describe 'version number' do
-    it 'has a version number' do
-      expect(DumpedRailers::VERSION).not_to be nil
-    end
-  end
-  
-  describe 'configuration' do
-    describe 'ignorable_columns' do
-      subject { DumpedRailers.config.ignorable_columns }
-
-      context 'default' do
-        it { is_expected.to eq(%w(id created_at updated_at)) }
+        )
       end
 
-      context 'when configured' do
-        subject {
-          DumpedRailers.configure { |config| 
-            config.ignorable_columns += ['uuid', 'tenant_id', 'published_on']
-          }
-        }
+      it 'generates article records with proper associations' do
+        subject
 
-        it 'updates configuration' do
-          expect { subject }.to change { DumpedRailers.config.ignorable_columns }.to (a_collection_containing_exactly *%w(id created_at updated_at uuid tenant_id published_on))
+        expect(Article.all).to contain_exactly(
+          have_attributes(
+            title: 'Harry Potter',
+            writer: have_attributes(
+              name: 'J. K. Rowling'
+            ),
+          ),
+          have_attributes(
+            title: 'Princess Mononoke',
+            writer: have_attributes(
+              name: 'Hayao Miyazaki'
+            ),
+          ),
+          have_attributes(
+            title: 'Sprited Away',
+            writer: have_attributes(
+              name: 'Hayao Miyazaki'
+            ),
+          ),
+          have_attributes(
+            title: 'Alice in Wonderland',
+            writer: have_attributes(
+              name: 'Walt Disney'
+            ),
+          ),
+          have_attributes(
+            title: 'Peter Pan',
+            writer: have_attributes(
+              name: 'Walt Disney'
+            ),
+          ),
+          have_attributes(
+            title: 'The Lord of the Rings',
+            writer: have_attributes(
+              name: 'John Ronald Reuel Tolkien'
+            ),
+          ),
+          have_attributes(
+            title: 'Phoenix',
+            writer: have_attributes(
+              name: 'Osamu Tezuka'
+            ),
+          ),
+          have_attributes(
+            title: 'Black Jack',
+            writer: have_attributes(
+              name: 'Osamu Tezuka'
+            ),
+          ),
+        )
+      end
+    end
+
+    describe 'version number' do
+      it 'has a version number' do
+        expect(DumpedRailers::VERSION).not_to be nil
+      end
+    end
+
+    describe 'configuration' do
+      describe 'ignorable_columns' do
+        subject { DumpedRailers.config.ignorable_columns }
+
+        context 'default' do
+          it { is_expected.to eq(%w(id created_at updated_at)) }
+        end
+
+        context 'when configured' do
+          subject {
+            DumpedRailers.configure { |config| 
+              config.ignorable_columns += ['uuid', 'tenant_id', 'published_on']
+            }
+          }
+
+          it 'updates configuration' do
+            expect { subject }.to change { DumpedRailers.config.ignorable_columns }.to (a_collection_containing_exactly *%w(id created_at updated_at uuid tenant_id published_on))
+          end
+        end
+      end
+
+      describe 'any other options' do
+        subject { DumpedRailers.config.a_random_option }
+
+        context 'with default value' do
+          it { is_expected.to be_nil }
+        end
+
+        context 'when configured' do
+          subject {
+            DumpedRailers.configure { |config| 
+              config.a_random_option = :new_value
+            }
+          }
+
+          it 'updates configuration' do
+            expect { subject }.to change { DumpedRailers.config.a_random_option }.to (:new_value)
+          end
         end
       end
     end
 
-    describe 'any other options' do
-      subject { DumpedRailers.config.a_random_option }
+    context 'with in-memory fixtures' do
+      subject { DumpedRailers.import!(fixtures) }
 
-      context 'with default value' do
-        it { is_expected.to be_nil }
-      end
-
-      context 'when configured' do
-        subject {
-          DumpedRailers.configure { |config| 
-            config.a_random_option = :new_value
+      let(:fixtures) {
+        {
+          'authors' => {
+            '_fixture' =>
+              {
+                'model_class'          => 'Author',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            '__author_1' => {
+              'name' => 'William Shakespeare',
+            },
+            '__author_2' => {
+              'name' => 'Shikibu Murasaki',
+            },
+          },
+          'articles'  =>  {
+            '_fixture' =>
+              {
+                'model_class'          => 'Article',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            '__article_1' => {
+              'title'  => 'Romeo and Juliet',
+              'writer' => '__author_1'
+            },
+            '__article_2' => {
+              'title'  => 'King Lear',
+              'writer' => '__author_1'
+            },
+            '__article_3' => {
+              'title'  => 'Genji Monogatari',
+              'writer' => '__author_2'
+            },
           }
         }
+      }
 
-        it 'updates configuration' do
-          expect { subject }.to change { DumpedRailers.config.a_random_option }.to (:new_value)
-        end
+      it 'generates corresponding records' do
+        expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+      end
+
+      it 'generates author records' do
+        subject
+
+        expect(Author.all).to contain_exactly(
+          have_attributes(
+            name: 'William Shakespeare'
+          ),
+          have_attributes(
+            name: 'Shikibu Murasaki'
+          ),
+        )
+      end
+
+      it 'generates article records with proper associations' do
+        subject
+
+        expect(Article.all).to contain_exactly(
+          have_attributes(
+            title: 'Romeo and Juliet',
+            writer: have_attributes(
+              name: 'William Shakespeare'
+            ),
+          ),
+          have_attributes(
+            title: 'King Lear',
+            writer: have_attributes(
+              name: 'William Shakespeare'
+            ),
+          ),
+          have_attributes(
+            title: 'Genji Monogatari',
+            writer: have_attributes(
+              name: 'Shikibu Murasaki'
+            ),
+          ),
+        )
       end
     end
   end

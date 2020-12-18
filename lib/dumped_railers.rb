@@ -8,12 +8,14 @@ require 'dumped_railers/import'
 module DumpedRailers
   class << self
 
-    def dump!(*models, base_dir: './', preprocessors: nil)
+    def dump!(*models, base_dir: nil, preprocessors: nil)
       preprocessors = [Preprocessor::StripIgnorables.new, *preprocessors].compact.uniq
 
       fixture_handler = Dump.new(*models, preprocessors: preprocessors)
-      fixture_handler.build_fixtures!
+      fixtures = fixture_handler.build_fixtures!
       fixture_handler.persist_all!(base_dir)
+
+      fixtures
     end
 
     def import!(*paths)
