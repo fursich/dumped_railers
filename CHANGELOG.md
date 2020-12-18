@@ -26,3 +26,7 @@
 ### Changed
 - Update documents not to eagerload DumpedRailers to prevent accidental data breakage / leakage.
   To activate, it is preferable to require explicitly where necessary.
+
+## [0.1.5]
+### Added
+- Supported in-memopry fixtures. Now users can dump into and import from in-memory fixture object without saving files.

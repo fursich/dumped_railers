@@ -67,6 +67,17 @@ DumpedRailers.import!('tmp/fixtures/users.yml', 'tmp/fixtures/items.yml')
 
 NOTE: you at least have to provide all the dependent records, so that DumpedRailers can resolve dependencies among the fixtures provided.
 
+### Using In-Memory Fixtures
+
+DumpedRailers.dump! also returns an object, which can be imported directly as in-memory fixture.
+
+```ruby
+fixtures = DumpedRailers.dump!(User, Item, Tag)
+DumpedRailers.import!(fixtures)
+```
+
+DumpedRailers does not save the fixtures when `base_dir` keyword argument is not specified.
+
 ### Ignored Columns
 
 * By default, DumpedRailers ignore three columns - `id`, `created_at`, `updated_at`. You can always update/change this settings as follows.
