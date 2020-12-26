@@ -2,6 +2,12 @@ require 'bundler/setup'
 require 'pry'
 require 'database_cleaner/active_record'
 
+if RUBY_VERSION >= '2.7.2'
+  # NOTE: https://bugs.ruby-lang.org/issues/17000
+  # this will keep us informed of deprecation warnings after Ruby 2.7.2
+  Warning[:deprecated] = true
+end
+
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), 'support'))
 require 'active_record_helper'
