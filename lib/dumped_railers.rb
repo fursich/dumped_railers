@@ -4,10 +4,12 @@ require 'dumped_railers/version'
 require 'dumped_railers/file_helper.rb'
 require 'dumped_railers/dump'
 require 'dumped_railers/import'
+require 'dumped_railers/configuration'
 
 module DumpedRailers
-  class << self
+  extend Configuration
 
+  class << self
     def dump!(*models, base_dir: nil, preprocessors: nil)
       config.preprocessors.unshift(Preprocessor::StripIgnorables.new)
       config.preprocessors += preprocessors if preprocessors.present?
@@ -26,40 +28,6 @@ module DumpedRailers
 
       fixture_handler = Import.new(*paths)
       fixture_handler.import_all!
-    end
-
-    class Configuration < ::OpenStruct; end
-
-    def preprocessors
-      config.preprocessors
-    end
-
-    def ignorable_columns
-      config.ignorable_columns
-    end
-
-    def configure
-      yield config
-    end
-
-    def config
-      @_config ||= Configuration.new
-    end
-    private :config
-
-    def clear_configuration!
-      @_config = nil
-    end
-    private :clear_configuration!
-
-    # FIXME: make it minimum
-    IGNORABLE_COLUMNS = %w[id created_at updated_at]
-    def configure_defaults!
-      clear_configuration!
-      configure do |config|
-        config.ignorable_columns = IGNORABLE_COLUMNS
-        config.preprocessors ||= []
-      end
     end
   end
 

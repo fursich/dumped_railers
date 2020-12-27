@@ -428,92 +428,6 @@ RSpec.describe DumpedRailers do
       end
     end
 
-    describe 'version number' do
-      it 'has a version number' do
-        expect(DumpedRailers::VERSION).not_to be nil
-      end
-    end
-
-    describe 'configuration' do
-      describe 'ignorable_columns' do
-        subject { DumpedRailers.ignorable_columns }
-
-        context 'default' do
-          it { is_expected.to eq(%w(id created_at updated_at)) }
-        end
-
-        context 'when configured' do
-          subject {
-            DumpedRailers.configure { |config| 
-              config.ignorable_columns += ['uuid', 'tenant_id', 'published_on']
-            }
-          }
-
-          it 'updates configuration' do
-            expect { subject }.to change { DumpedRailers.ignorable_columns }.to (a_collection_containing_exactly *%w(id created_at updated_at uuid tenant_id published_on))
-          end
-        end
-      end
-
-      describe 'any other options' do
-        subject { DumpedRailers.instance_variable_get(:@_config).a_random_option }
-
-        context 'with default value' do
-          it { is_expected.to be_nil }
-        end
-
-        context 'when configured' do
-          before do
-            DumpedRailers.configure { |config|
-              config.a_random_option = :new_value
-            }
-          end
-
-          it 'updates configuration' do
-            expect(subject).to eq :new_value
-          end
-        end
-      end
-
-      describe 'preprocessors' do
-        subject { DumpedRailers.preprocessors }
-
-        let(:preprocessor_1) { -> (_model, _attrs) { {foo: :bar} } }
-        let(:preprocessor_2) { -> (_model, _attrs) { {bar: :baz} } }
-
-        context 'default' do
-          it { is_expected.to be_empty }
-        end
-
-        context 'when configured' do
-          subject {
-            DumpedRailers.configure { |config|
-              config.preprocessors = [preprocessor_1, preprocessor_2]
-            }
-          }
-
-          context 'before .dump! is called' do
-            it 'updates configuration' do
-              expect { subject }.to change { DumpedRailers.preprocessors }.to([preprocessor_1, preprocessor_2])
-            end
-          end
-
-          context 'when .dump! is called' do
-            it 'updates configuration' do
-              subject
-              DumpedRailers.dump!
-
-              expect(DumpedRailers.preprocessors).to match [
-                be_an_instance_of(DumpedRailers::Preprocessor::StripIgnorables),
-                preprocessor_1,
-                preprocessor_2
-              ]
-            end
-          end
-        end
-      end
-    end
-
     context 'with in-memory fixtures' do
       subject { DumpedRailers.import!(fixtures) }
 
@@ -595,6 +509,24 @@ RSpec.describe DumpedRailers do
           ),
         )
       end
+    end
+  end
+
+  describe 'version number' do
+    it 'has a version number' do
+      expect(DumpedRailers::VERSION).not_to be nil
+    end
+  end
+
+  describe '.configure_defaults!' do
+    describe 'ignorable_columns' do
+      subject { DumpedRailers.ignorable_columns }
+      it { is_expected.to eq(%w(id created_at updated_at)) }
+    end
+
+    describe 'preprocessors' do
+      subject { DumpedRailers.preprocessors }
+      it { is_expected.to be_empty }
     end
   end
 end
