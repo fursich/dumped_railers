@@ -287,7 +287,7 @@ RSpec.describe DumpedRailers do
       context 'when imported via raw fixture data' do
         let(:raw_fixtures) { DumpedRailers.dump!(*models) }
 
-        subject { DumpedRailers.import!(raw_fixtures) }
+        subject { DumpedRailers.import!(raw_fixtures, authorized_models: [Article, Author]) }
 
         it 'populates the Author and Article records' do
           expect { subject }.to change { Author.count }.from(2).to(4)
@@ -316,7 +316,7 @@ RSpec.describe DumpedRailers do
           DumpedRailers.dump!(*models, base_dir: 'spec/tmp')
         end
 
-        subject { DumpedRailers.import!('spec/tmp') }
+        subject { DumpedRailers.import!('spec/tmp', authorized_models: [Article, Author]) }
 
         it 'populates the Author and Article records' do
           expect { subject }.to change { Author.count }.from(2).to(4)
@@ -343,93 +343,141 @@ RSpec.describe DumpedRailers do
 
   describe '.import!' do
     context 'with fixture files' do
-      subject { DumpedRailers.import!(*paths) }
+      subject { DumpedRailers.import!(*paths, authorized_models: authorized_models) }
       let(:paths) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
 
-      it 'generates corresponding records' do
-        expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
-      end
+      context 'with full authorization' do
+        let(:authorized_models) { :any }
 
-      it 'generates author records' do
-        subject
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
+        end
 
-        expect(Author.all).to contain_exactly(
-          have_attributes(
-            name: 'Osamu Tezuka'
-          ),
-          have_attributes(
-            name: 'J. K. Rowling'
-          ),
-          have_attributes(
-            name: 'Hayao Miyazaki'
-          ),
-          have_attributes(
-            name: 'Walt Disney'
-          ),
-          have_attributes(
-            name: 'John Ronald Reuel Tolkien'
-          ),
-        )
-      end
+        it 'generates author records' do
+          subject
 
-      it 'generates article records with proper associations' do
-        subject
-
-        expect(Article.all).to contain_exactly(
-          have_attributes(
-            title: 'Harry Potter',
-            writer: have_attributes(
+          expect(Author.all).to contain_exactly(
+            have_attributes(
+              name: 'Osamu Tezuka'
+            ),
+            have_attributes(
               name: 'J. K. Rowling'
             ),
-          ),
-          have_attributes(
-            title: 'Princess Mononoke',
-            writer: have_attributes(
+            have_attributes(
               name: 'Hayao Miyazaki'
             ),
-          ),
-          have_attributes(
-            title: 'Sprited Away',
-            writer: have_attributes(
-              name: 'Hayao Miyazaki'
-            ),
-          ),
-          have_attributes(
-            title: 'Alice in Wonderland',
-            writer: have_attributes(
+            have_attributes(
               name: 'Walt Disney'
             ),
-          ),
-          have_attributes(
-            title: 'Peter Pan',
-            writer: have_attributes(
-              name: 'Walt Disney'
-            ),
-          ),
-          have_attributes(
-            title: 'The Lord of the Rings',
-            writer: have_attributes(
+            have_attributes(
               name: 'John Ronald Reuel Tolkien'
             ),
-          ),
-          have_attributes(
-            title: 'Phoenix',
-            writer: have_attributes(
-              name: 'Osamu Tezuka'
+          )
+        end
+
+        it 'generates article records with proper associations' do
+          subject
+
+          expect(Article.all).to contain_exactly(
+            have_attributes(
+              title: 'Harry Potter',
+              writer: have_attributes(
+                name: 'J. K. Rowling'
+              ),
             ),
-          ),
-          have_attributes(
-            title: 'Black Jack',
-            writer: have_attributes(
-              name: 'Osamu Tezuka'
+            have_attributes(
+              title: 'Princess Mononoke',
+              writer: have_attributes(
+                name: 'Hayao Miyazaki'
+              ),
             ),
-          ),
-        )
+            have_attributes(
+              title: 'Sprited Away',
+              writer: have_attributes(
+                name: 'Hayao Miyazaki'
+              ),
+            ),
+            have_attributes(
+              title: 'Alice in Wonderland',
+              writer: have_attributes(
+                name: 'Walt Disney'
+              ),
+            ),
+            have_attributes(
+              title: 'Peter Pan',
+              writer: have_attributes(
+                name: 'Walt Disney'
+              ),
+            ),
+            have_attributes(
+              title: 'The Lord of the Rings',
+              writer: have_attributes(
+                name: 'John Ronald Reuel Tolkien'
+              ),
+            ),
+            have_attributes(
+              title: 'Phoenix',
+              writer: have_attributes(
+                name: 'Osamu Tezuka'
+              ),
+            ),
+            have_attributes(
+              title: 'Black Jack',
+              writer: have_attributes(
+                name: 'Osamu Tezuka'
+              ),
+            ),
+          )
+        end
+      end
+
+      context 'when authorization granted for all the imported models' do
+        let(:authorized_models) { [Author, Article] }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
+        end
+      end
+
+      context 'when authorization missing for part of the imported models' do
+        let(:authorized_models) { [Author] }
+
+        it 'raises RuntimeError' do
+          expect { subject }.to raise_error RuntimeError
+        end
+
+        it 'does not generate any Author records' do
+          expect { subject rescue nil }.not_to change { Author.count }
+        end
+
+        it 'does not generate any Article records' do
+          expect { subject rescue nil }.not_to change { Article.count }
+        end
+      end
+
+      context 'with no authorization' do
+        let(:authorized_models) { [] }
+
+        it 'raises RuntimeError' do
+          expect { subject }.to raise_error RuntimeError
+        end
+
+        it 'does not generate any Author records' do
+          expect { subject rescue nil }.not_to change { Author.count }
+        end
+
+        it 'does not generate any Article records' do
+          expect { subject rescue nil }.not_to change { Article.count }
+        end
       end
     end
 
     context 'with in-memory fixtures' do
-      subject { DumpedRailers.import!(fixtures) }
+      subject { DumpedRailers.import!(fixtures, authorized_models: authorized_models) }
 
       let(:fixtures) {
         {
@@ -468,46 +516,94 @@ RSpec.describe DumpedRailers do
         }
       }
 
-      it 'generates corresponding records' do
-        expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
-      end
+      context 'with full authorization' do
+        let(:authorized_models) { :any }
 
-      it 'generates author records' do
-        subject
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
 
-        expect(Author.all).to contain_exactly(
-          have_attributes(
-            name: 'William Shakespeare'
-          ),
-          have_attributes(
-            name: 'Shikibu Murasaki'
-          ),
-        )
-      end
+        it 'generates author records' do
+          subject
 
-      it 'generates article records with proper associations' do
-        subject
-
-        expect(Article.all).to contain_exactly(
-          have_attributes(
-            title: 'Romeo and Juliet',
-            writer: have_attributes(
+          expect(Author.all).to contain_exactly(
+            have_attributes(
               name: 'William Shakespeare'
             ),
-          ),
-          have_attributes(
-            title: 'King Lear',
-            writer: have_attributes(
-              name: 'William Shakespeare'
-            ),
-          ),
-          have_attributes(
-            title: 'Genji Monogatari',
-            writer: have_attributes(
+            have_attributes(
               name: 'Shikibu Murasaki'
             ),
-          ),
-        )
+          )
+        end
+
+        it 'generates article records with proper associations' do
+          subject
+
+          expect(Article.all).to contain_exactly(
+            have_attributes(
+              title: 'Romeo and Juliet',
+              writer: have_attributes(
+                name: 'William Shakespeare'
+              ),
+            ),
+            have_attributes(
+              title: 'King Lear',
+              writer: have_attributes(
+                name: 'William Shakespeare'
+              ),
+            ),
+            have_attributes(
+              title: 'Genji Monogatari',
+              writer: have_attributes(
+                name: 'Shikibu Murasaki'
+              ),
+            ),
+          )
+        end
+      end
+
+      context 'when authorization granted for all the imported models' do
+        let(:authorized_models) { [Author, Article] }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
+      end
+
+      context 'when authorization missing for part of the imported models' do
+        let(:authorized_models) { [Author] }
+
+        it 'raises RuntimeError' do
+          expect { subject }.to raise_error RuntimeError
+        end
+
+        it 'does not generate any Author records' do
+          expect { subject rescue nil }.not_to change { Author.count }
+        end
+
+        it 'does not generate any Article records' do
+          expect { subject rescue nil }.not_to change { Article.count }
+        end
+      end
+
+      context 'with no authorization' do
+        let(:authorized_models) { [] }
+
+        it 'raises RuntimeError' do
+          expect { subject }.to raise_error RuntimeError
+        end
+
+        it 'does not generate any Author records' do
+          expect { subject rescue nil }.not_to change { Author.count }
+        end
+
+        it 'does not generate any Article records' do
+          expect { subject rescue nil }.not_to change { Article.count }
+        end
       end
     end
   end

@@ -21,12 +21,12 @@ module DumpedRailers
       fixtures
     end
 
-    def import!(*paths)
+    def import!(*paths, authorized_models: [])
       # make sure class-baseed caches starts with clean state
       DumpedRailers::RecordBuilder::FixtureRow::RecordStore.clear!
       DumpedRailers::RecordBuilder::DependencyTracker.clear!
 
-      fixture_handler = Import.new(*paths)
+      fixture_handler = Import.new(*paths, authorized_models: authorized_models)
       fixture_handler.import_all!
     end
   end

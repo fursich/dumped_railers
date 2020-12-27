@@ -100,19 +100,19 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureSet do
       end
 
       subject { fixture_set.fixture_tables.map(&:model_name) }
-  
+
       it 'places Author records prior to Article records' do
         expect(subject.index(:Author)).to be < subject.index(:Article)
       end
-  
+
       it 'places Article records prior to ContentHolder records' do
         expect(subject.index(:Article)).to be < subject.index(:ContentHolder)
       end
-  
+
       it 'places TextContent records prior to ContentHolder records' do
         expect(subject.index(:TextContent)).to be < subject.index(:ContentHolder)
       end
-  
+
       it 'places PictureContent records prior to ContentHolder records' do
         expect(subject.index(:PictureContent)).to be < subject.index(:ContentHolder)
       end
@@ -127,6 +127,48 @@ RSpec.describe DumpedRailers::RecordBuilder::FixtureSet do
 
       it 'raises RuntimeError' do
         expect { subject }.to raise_error RuntimeError
+      end
+    end
+  end
+
+  describe '#authorize_models!' do
+    let(:raw_fixtures) {
+      [article_records, picture_content_records, author_records, content_holder_records, text_content_records]
+    }
+
+    let(:fixture_set) { described_class.new(raw_fixtures, authorized_models: authorized_models) }
+
+    subject { fixture_set.authorize_models! }
+
+    context 'without any authorized_models' do
+      let(:authorized_models) { [] }
+
+      it 'raises RuntimeError' do
+        expect { subject }.to raise_error RuntimeError
+      end
+    end
+
+    context 'when authorized_models covers only part of the models' do
+      let(:authorized_models) { [Article, Author, PictureContent, TextContent] }
+
+      it 'raises RuntimeError' do
+        expect { subject }.to raise_error RuntimeError
+      end
+    end
+
+    context 'when authorized_models covers all' do
+      let(:authorized_models) { [Article, Author, ContentHolder, PictureContent, TextContent] }
+
+      it 'does not raise any errors' do
+        expect { subject }.not_to raise_error
+      end
+    end
+
+    context 'when authorized_models is :any' do
+      let(:authorized_models) { :any }
+
+      it 'does not raise any errors' do
+        expect { subject }.not_to raise_error
       end
     end
   end

@@ -6,17 +6,18 @@ module DumpedRailers
   class Import
     attr_reader :fixture_set
 
-    def initialize(*paths)
+    def initialize(*paths, authorized_models: [])
       if (paths.first.is_a? Hash)
         @raw_fixtures = paths.first.values
       else
         @raw_fixtures = FileHelper.read_fixtures(*paths)
       end
 
-      @fixture_set = RecordBuilder::FixtureSet.new(@raw_fixtures)
+      @fixture_set = RecordBuilder::FixtureSet.new(@raw_fixtures, authorized_models: authorized_models)
     end
 
     def import_all!
+      fixture_set.authorize_models!
       fixture_set.sort_by_table_dependencies!
       @record_sets = fixture_set.build_record_sets!
 
