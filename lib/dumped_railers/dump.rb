@@ -5,9 +5,9 @@ require_relative 'preprocessor/strip_ignorables'
 
 module DumpedRailers
   class Dump
-    def initialize(*models, preprocessors: [])
+    def initialize(*models)
       @fixture_tables = models.map { |model|
-        FixtureBuilder::Model.new(model, preprocessors: preprocessors)
+        FixtureBuilder::Model.new(model)
       }
     end
 

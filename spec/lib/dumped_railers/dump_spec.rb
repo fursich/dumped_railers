@@ -2,7 +2,13 @@
 
 RSpec.describe DumpedRailers::Dump do
   describe '#build_fixtures!' do
-    let(:fixture_generator) { described_class.new(*models, preprocessors: preprocessors) }
+    before do
+      DumpedRailers.configure do |config|
+        config.preprocessors = []
+      end
+    end
+
+    let(:fixture_generator) { described_class.new(*models) }
 
     subject { fixture_generator.build_fixtures! }
 
@@ -12,8 +18,6 @@ RSpec.describe DumpedRailers::Dump do
     let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
     let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
     let(:models)    { [Author, Article] }
-
-    let(:preprocessors) { [] }
 
     it {
       is_expected.to match(
@@ -61,7 +65,13 @@ RSpec.describe DumpedRailers::Dump do
   end
 
   describe '#persist_all!' do
-    let(:fixture_generator) { described_class.new(*models, preprocessors: []) }
+    before do
+      DumpedRailers.configure do |config|
+        config.preprocessors = []
+      end
+    end
+
+    let(:fixture_generator) { described_class.new(*models) }
     let!(:fixtures) { fixture_generator.build_fixtures! }
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }

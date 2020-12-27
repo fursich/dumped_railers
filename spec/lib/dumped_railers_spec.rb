@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe DumpedRailers do
+  around do |example|
+    DumpedRailers.instance_variable_set(:@_config, nil)
+    DumpedRailers.configure_defaults!
+
+    example.run
+  end
+
   describe '.dump!' do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
@@ -469,13 +476,51 @@ RSpec.describe DumpedRailers do
 
         context 'when configured' do
           subject {
-            DumpedRailers.configure { |config| 
+            DumpedRailers.configure { |config|
               config.a_random_option = :new_value
             }
           }
 
           it 'updates configuration' do
             expect { subject }.to change { DumpedRailers.config.a_random_option }.to (:new_value)
+          end
+        end
+      end
+
+      describe 'preprocessors' do
+        subject { DumpedRailers.config.preprocessors }
+
+        let(:preprocessor_1) { -> (_model, _attrs) { {foo: :bar} } }
+        let(:preprocessor_2) { -> (_model, _attrs) { {bar: :baz} } }
+
+        context 'default' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when configured' do
+          subject {
+            DumpedRailers.configure { |config|
+              config.preprocessors = [preprocessor_1, preprocessor_2]
+            }
+          }
+
+          context 'before .dump! is called' do
+            it 'updates configuration' do
+              expect { subject }.to change { DumpedRailers.config.preprocessors }.to([preprocessor_1, preprocessor_2])
+            end
+          end
+
+          context 'when .dump! is called' do
+            it 'updates configuration' do
+              subject
+              DumpedRailers.dump!
+
+              expect(DumpedRailers.config.preprocessors).to match [
+                be_an_instance_of(DumpedRailers::Preprocessor::StripIgnorables),
+                preprocessor_1,
+                preprocessor_2
+              ]
+            end
           end
         end
       end

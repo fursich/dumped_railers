@@ -9,9 +9,10 @@ module DumpedRailers
   class << self
 
     def dump!(*models, base_dir: nil, preprocessors: nil)
-      preprocessors = [Preprocessor::StripIgnorables.new, *preprocessors].compact.uniq
+      config.preprocessors.unshift(Preprocessor::StripIgnorables.new)
+      config.preprocessors += preprocessors if preprocessors.present?
 
-      fixture_handler = Dump.new(*models, preprocessors: preprocessors)
+      fixture_handler = Dump.new(*models)
       fixtures = fixture_handler.build_fixtures!
       fixture_handler.persist_all!(base_dir)
 
@@ -42,6 +43,7 @@ module DumpedRailers
     def configure_defaults!
       configure do |config|
         config.ignorable_columns = IGNORABLE_COLUMNS
+        config.preprocessors ||= []
       end
     end
   end
