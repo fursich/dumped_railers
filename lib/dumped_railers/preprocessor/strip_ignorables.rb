@@ -5,7 +5,7 @@ module DumpedRailers
     class StripIgnorables
       def call(attributes, _model)
         attributes.reject { |column_name, _v|
-          DumpedRailers.config.ignorable_columns.map(&:to_s).include?(column_name)
+          DumpedRailers.ignorable_columns.map(&:to_s).include?(column_name)
         }
       end
     end

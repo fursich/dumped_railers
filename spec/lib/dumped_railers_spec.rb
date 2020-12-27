@@ -1,13 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe DumpedRailers do
-  around do |example|
-    DumpedRailers.instance_variable_set(:@_config, nil)
-    DumpedRailers.configure_defaults!
-
-    example.run
-  end
-
   describe '.dump!' do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
@@ -128,15 +121,10 @@ RSpec.describe DumpedRailers do
     end
 
     context 'when ignorable_columns are configured' do
-      around do |example|
+      before do
         DumpedRailers.configure do |config|
           config.ignorable_columns = %w[name created_at updated_at]
         end
-
-        example.run
-
-        # make sure that the remaining tests run under default settings
-        DumpedRailers.configure_defaults!
       end
 
       before do
@@ -448,7 +436,7 @@ RSpec.describe DumpedRailers do
 
     describe 'configuration' do
       describe 'ignorable_columns' do
-        subject { DumpedRailers.config.ignorable_columns }
+        subject { DumpedRailers.ignorable_columns }
 
         context 'default' do
           it { is_expected.to eq(%w(id created_at updated_at)) }
@@ -462,33 +450,33 @@ RSpec.describe DumpedRailers do
           }
 
           it 'updates configuration' do
-            expect { subject }.to change { DumpedRailers.config.ignorable_columns }.to (a_collection_containing_exactly *%w(id created_at updated_at uuid tenant_id published_on))
+            expect { subject }.to change { DumpedRailers.ignorable_columns }.to (a_collection_containing_exactly *%w(id created_at updated_at uuid tenant_id published_on))
           end
         end
       end
 
       describe 'any other options' do
-        subject { DumpedRailers.config.a_random_option }
+        subject { DumpedRailers.instance_variable_get(:@_config).a_random_option }
 
         context 'with default value' do
           it { is_expected.to be_nil }
         end
 
         context 'when configured' do
-          subject {
+          before do
             DumpedRailers.configure { |config|
               config.a_random_option = :new_value
             }
-          }
+          end
 
           it 'updates configuration' do
-            expect { subject }.to change { DumpedRailers.config.a_random_option }.to (:new_value)
+            expect(subject).to eq :new_value
           end
         end
       end
 
       describe 'preprocessors' do
-        subject { DumpedRailers.config.preprocessors }
+        subject { DumpedRailers.preprocessors }
 
         let(:preprocessor_1) { -> (_model, _attrs) { {foo: :bar} } }
         let(:preprocessor_2) { -> (_model, _attrs) { {bar: :baz} } }
@@ -506,7 +494,7 @@ RSpec.describe DumpedRailers do
 
           context 'before .dump! is called' do
             it 'updates configuration' do
-              expect { subject }.to change { DumpedRailers.config.preprocessors }.to([preprocessor_1, preprocessor_2])
+              expect { subject }.to change { DumpedRailers.preprocessors }.to([preprocessor_1, preprocessor_2])
             end
           end
 
@@ -515,7 +503,7 @@ RSpec.describe DumpedRailers do
               subject
               DumpedRailers.dump!
 
-              expect(DumpedRailers.config.preprocessors).to match [
+              expect(DumpedRailers.preprocessors).to match [
                 be_an_instance_of(DumpedRailers::Preprocessor::StripIgnorables),
                 preprocessor_1,
                 preprocessor_2

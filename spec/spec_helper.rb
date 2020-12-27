@@ -39,6 +39,7 @@ RSpec.configure do |config|
 
   # need to maintain class-baseed caches in clean state
   config.around(:each) do  |example|
+    DumpedRailers.configure_defaults!
     example.run
     DumpedRailers::RecordBuilder::FixtureRow::RecordStore.clear!
     DumpedRailers::RecordBuilder::DependencyTracker.clear!

@@ -6,7 +6,7 @@ module DumpedRailers
       def initialize(record, model)
         @record = record
         @model = model
-        @preprocessors = DumpedRailers.config.preprocessors
+        @preprocessors = DumpedRailers.preprocessors
       end
 
       def build!

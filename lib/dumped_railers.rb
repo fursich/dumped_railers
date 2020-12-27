@@ -30,17 +30,32 @@ module DumpedRailers
 
     class Configuration < ::OpenStruct; end
 
-    def config
-      @_config ||= Configuration.new
+    def preprocessors
+      config.preprocessors
+    end
+
+    def ignorable_columns
+      config.ignorable_columns
     end
 
     def configure
       yield config
     end
 
+    def config
+      @_config ||= Configuration.new
+    end
+    private :config
+
+    def clear_configuration!
+      @_config = nil
+    end
+    private :clear_configuration!
+
     # FIXME: make it minimum
     IGNORABLE_COLUMNS = %w[id created_at updated_at]
     def configure_defaults!
+      clear_configuration!
       configure do |config|
         config.ignorable_columns = IGNORABLE_COLUMNS
         config.preprocessors ||= []
