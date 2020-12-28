@@ -11,7 +11,7 @@ module DumpedRailers
 
       def initialize(raw_fixtures, authorized_models: [])
         @fixture_tables = raw_fixtures.map { |raw_records| build_fixture_table(raw_records) }
-        @authorized_models = authorized_models
+        @authorized_models = Array(authorized_models)
       end
 
       def sort_by_table_dependencies!
@@ -23,7 +23,7 @@ module DumpedRailers
       end
 
       def authorize_models!
-        return if @authorized_models == :any
+        return if @authorized_models.include?(:any)
 
         unauthorized_models = fixture_models.reject { |model|
           @authorized_models.include? model

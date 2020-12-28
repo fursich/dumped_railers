@@ -25,8 +25,9 @@ module DumpedRailers
       # make sure class-baseed caches starts with clean state
       DumpedRailers::RecordBuilder::FixtureRow::RecordStore.clear!
       DumpedRailers::RecordBuilder::DependencyTracker.clear!
+      config.authorized_models += Array(authorized_models) if authorized_models.present?
 
-      fixture_handler = Import.new(*paths, authorized_models: authorized_models)
+      fixture_handler = Import.new(*paths, authorized_models: config.authorized_models)
       fixture_handler.import_all!
     end
   end

@@ -605,6 +605,42 @@ RSpec.describe DumpedRailers do
           expect { subject rescue nil }.not_to change { Article.count }
         end
       end
+
+      context 'when authorized_models are configured in prior' do
+        before do
+          DumpedRailers.configure do |config|
+            config.authorized_models = [Author, Article]
+          end
+        end
+
+        let(:authorized_models) { [] }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
+      end
+
+      context 'when authorized_models are configured partically' do
+        before do
+          DumpedRailers.configure do |config|
+            config.authorized_models = [Author]
+          end
+        end
+
+        let(:authorized_models) { [Article] }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
+      end
     end
   end
 
@@ -622,6 +658,11 @@ RSpec.describe DumpedRailers do
 
     describe 'preprocessors' do
       subject { DumpedRailers.preprocessors }
+      it { is_expected.to be_empty }
+    end
+
+    describe 'authorized_models' do
+      subject { DumpedRailers.authorized_models }
       it { is_expected.to be_empty }
     end
   end

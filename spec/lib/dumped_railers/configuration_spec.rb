@@ -52,6 +52,26 @@ RSpec.describe DumpedRailers::Configuration do
       end
     end
 
+    describe 'authorized_models' do
+      subject { klass.authorized_models }
+
+      context 'default' do
+        it { is_expected.to be_empty }
+      end
+
+      context 'when configured' do
+        subject {
+          klass.configure { |config|
+            config.authorized_models = [:model1, :model2]
+          }
+        }
+
+        it 'updates configuration' do
+          expect { subject }.to change { klass.authorized_models }.to([:model1, :model2])
+        end
+      end
+    end
+
     describe 'any other options' do
       subject { klass.instance_variable_get(:@_config).a_random_option }
 
@@ -79,8 +99,9 @@ RSpec.describe DumpedRailers::Configuration do
     before do
       klass.configure do |config|
         config.ignorable_columns = [:uuid]
-        config.preprocessors = [:foo, :bar]
-        config.a_random_option = 'something'
+        config.preprocessors     = [:foo, :bar]
+        config.authorized_models = [:model1, :model2]
+        config.a_random_option   = 'something'
       end
     end
 
@@ -88,6 +109,7 @@ RSpec.describe DumpedRailers::Configuration do
       is_expected.to match(
         ignorable_columns: [:uuid],
         preprocessors:     [:foo, :bar],
+        authorized_models: [:model1, :model2],
         a_random_option:   'something',
       )
     }
@@ -110,8 +132,9 @@ RSpec.describe DumpedRailers::Configuration do
     before do
       klass.configure do |config|
         config.ignorable_columns = [:uuid]
-        config.preprocessors = [:foo, :bar]
-        config.a_random_option = :something
+        config.preprocessors     = [:foo, :bar]
+        config.authorized_models = [:model1, :model2]
+        config.a_random_option   = :something
       end
     end
 
@@ -121,6 +144,10 @@ RSpec.describe DumpedRailers::Configuration do
 
     it 'resets preprocessors' do
       expect { subject }.to change { klass.preprocessors }.to []
+    end
+
+    it 'resets authorized_models' do
+      expect { subject }.to change { klass.authorized_models }.to []
     end
 
     it 'resets other options' do

@@ -3,7 +3,7 @@
 module DumpedRailers
   module Configuration
     extend Forwardable
-    def_delegators :@_config, :preprocessors, :ignorable_columns
+    def_delegators :@_config, :preprocessors, :ignorable_columns, :authorized_models
 
     def configure
       yield config
@@ -17,7 +17,8 @@ module DumpedRailers
     def configure_defaults!
       clear_configuration!(
         ignorable_columns: IGNORABLE_COLUMNS,
-        preprocessors:     []
+        preprocessors:     [],
+        authorized_models: [],
       )
     end
 
