@@ -30,3 +30,12 @@
 ## [0.1.5]
 ### Added
 - Supported in-memopry fixtures. Now users can dump into and import from in-memory fixture object without saving files.
+
+## [0.2.0]
+### Added
+- Provide options to limit models to import, so that users can prohibit modification to arbitrary models.
+- Support for Ruby 3.0.0 (requires Rails >= 6.0)
+
+### Changed
+- Accept both global configuration as well as runtime (one-off) settings for all the available options.
+  Now all the configured settings will be overridden at runtime when the settings are provided with arguments.
