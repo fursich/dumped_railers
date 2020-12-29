@@ -14,7 +14,7 @@ module DumpedRailers
       config.preprocessors.unshift(Preprocessor::StripIgnorables.new(*options[:ignorable_columns]))
       config.preprocessors += preprocessors if preprocessors.present?
 
-      fixture_handler = Dump.new(*models)
+      fixture_handler = Dump.new(*models, preprocessors: config.preprocessors)
       fixtures = fixture_handler.build_fixtures!
       fixture_handler.persist_all!(base_dir)
 

@@ -2,13 +2,6 @@
 
 RSpec.describe DumpedRailers::Dump do
   describe '#build_fixtures!' do
-    before do
-      DumpedRailers.configure do |config|
-        config.preprocessors = []
-      end
-    end
-
-    let(:fixture_generator) { described_class.new(*models) }
 
     subject { fixture_generator.build_fixtures! }
 
@@ -19,58 +12,111 @@ RSpec.describe DumpedRailers::Dump do
     let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
     let(:models)    { [Author, Article] }
 
-    it {
-      is_expected.to match(
-        'authors' =>
-         {
-          '_fixture' =>
-            {
-              'model_class'          => 'Author',
-              'fixture_generated_by' => 'DumpedRailers',
-            },
-          "__author_#{author1.id}" => {
-             'id'   => author1.id,
-             'name' => author1.name
-            },
-          "__author_#{author2.id}" => {
-             'id'   => author2.id,
-             'name' => author2.name
-            },
-        },
-        'articles' =>
-        {
-         '_fixture' =>
+    context 'without any preprocessors' do
+      let(:fixture_generator) { described_class.new(*models) }
+
+      it {
+        is_expected.to match(
+          'authors' =>
            {
-             'model_class'          => 'Article',
-             'fixture_generated_by' => 'DumpedRailers',
-           },
-         "__article_#{article1.id}" => {
-            'id'     => article1.id,
-            'title'  => article1.title,
-            'writer' => "__author_#{author1.id}",
-           },
-         "__article_#{article2.id}" => {
-            'id'     => article2.id,
-            'title'  => article2.title,
-            'writer' => "__author_#{author1.id}",
-           },
-         "__article_#{article3.id}" => {
-            'id'     => article3.id,
-            'title'  => article3.title,
-            'writer' => "__author_#{author2.id}",
-           },
+            '_fixture' =>
+              {
+                'model_class'          => 'Author',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            "__author_#{author1.id}" => {
+               'id'   => author1.id,
+               'name' => author1.name
+              },
+            "__author_#{author2.id}" => {
+               'id'   => author2.id,
+               'name' => author2.name
+              },
+          },
+          'articles' =>
+          {
+           '_fixture' =>
+             {
+               'model_class'          => 'Article',
+               'fixture_generated_by' => 'DumpedRailers',
+             },
+           "__article_#{article1.id}" => {
+              'id'     => article1.id,
+              'title'  => article1.title,
+              'writer' => "__author_#{author1.id}",
+             },
+           "__article_#{article2.id}" => {
+              'id'     => article2.id,
+              'title'  => article2.title,
+              'writer' => "__author_#{author1.id}",
+             },
+           "__article_#{article3.id}" => {
+              'id'     => article3.id,
+              'title'  => article3.title,
+              'writer' => "__author_#{author2.id}",
+             },
+          }
+        )
+      }
+    end
+
+    context 'with a preprocessor given' do
+      let(:fixture_generator) { described_class.new(*models, preprocessors: preprocessors) }
+      let(:preprocessors) { [strip_id, upcase_author_name] }
+
+      let(:strip_id) {
+        -> (attrs, _model) { attrs.except('id') }
+      }
+
+      let(:upcase_author_name) {
+        -> (attrs, _model) {
+          attrs['name'].upcase! if attrs.has_key? 'name'
+          attrs
         }
-      )
-    }
+      }
+
+      it {
+        is_expected.to match(
+          'authors' =>
+           {
+            '_fixture' =>
+              {
+                'model_class'          => 'Author',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            "__author_#{author1.id}" => {
+               'name' => author1.name.upcase
+              },
+            "__author_#{author2.id}" => {
+               'name' => author2.name.upcase
+              },
+          },
+          'articles' =>
+          {
+           '_fixture' =>
+             {
+               'model_class'          => 'Article',
+               'fixture_generated_by' => 'DumpedRailers',
+             },
+           "__article_#{article1.id}" => {
+              'title'  => article1.title,
+              'writer' => "__author_#{author1.id}",
+             },
+           "__article_#{article2.id}" => {
+              'title'  => article2.title,
+              'writer' => "__author_#{author1.id}",
+             },
+           "__article_#{article3.id}" => {
+              'title'  => article3.title,
+              'writer' => "__author_#{author2.id}",
+             },
+          }
+        )
+      }
+    end
   end
 
   describe '#persist_all!' do
-    before do
-      DumpedRailers.configure do |config|
-        config.preprocessors = []
-      end
-    end
-
     let(:fixture_generator) { described_class.new(*models) }
     let!(:fixtures) { fixture_generator.build_fixtures! }
 

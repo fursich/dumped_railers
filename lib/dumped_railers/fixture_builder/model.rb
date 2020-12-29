@@ -5,10 +5,10 @@ require_relative 'record'
 module DumpedRailers
   module FixtureBuilder
     class Model
-      def initialize(model)
+      def initialize(model, preprocessors:)
         @model = model
         @fixture_records = model.order(:id).map { |record|
-          Record.new(record, model)
+          Record.new(record, model, preprocessors: preprocessors)
         }
       end
   

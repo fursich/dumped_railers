@@ -3,10 +3,10 @@
 module DumpedRailers
   module FixtureBuilder
     class Record
-      def initialize(record, model)
+      def initialize(record, model, preprocessors:)
         @record = record
         @model = model
-        @preprocessors = DumpedRailers.preprocessors
+        @preprocessors = preprocessors
       end
 
       def build!

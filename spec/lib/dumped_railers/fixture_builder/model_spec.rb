@@ -2,13 +2,7 @@
 
 RSpec.describe DumpedRailers::FixtureBuilder::Model do
   describe '#build!' do
-    before do
-      DumpedRailers.configure do |config|
-        config.preprocessors = preprocessors
-      end
-    end
-
-    let(:fixture_builder) { described_class.new(model) }
+    let(:fixture_builder) { described_class.new(model, preprocessors: preprocessors) }
     let(:preprocessors) { [] }
 
     subject { fixture_builder.build! }
