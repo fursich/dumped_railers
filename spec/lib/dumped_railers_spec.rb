@@ -342,13 +342,12 @@ RSpec.describe DumpedRailers do
   end
 
   describe '.import!' do
+    subject { DumpedRailers.import!(*fixtures, authorized_models: authorized_models) }
+
     context 'with fixture files' do
-      subject { DumpedRailers.import!(*paths, authorized_models: authorized_models) }
-      let(:paths) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
+      let(:fixtures) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
 
-      context 'with full authorization' do
-        let(:authorized_models) { :any }
-
+      shared_examples 'successful import' do
         it 'generates corresponding records' do
           expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
         end
@@ -431,21 +430,7 @@ RSpec.describe DumpedRailers do
         end
       end
 
-      context 'when authorization granted for all the imported models' do
-        let(:authorized_models) { [Author, Article] }
-
-        it 'does not raise RuntimeError' do
-          expect { subject }.not_to raise_error
-        end
-
-        it 'generates corresponding records' do
-          expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
-        end
-      end
-
-      context 'when authorization missing for part of the imported models' do
-        let(:authorized_models) { [Author] }
-
+      shared_examples 'import failure' do
         it 'raises RuntimeError' do
           expect { subject }.to raise_error RuntimeError
         end
@@ -459,27 +444,88 @@ RSpec.describe DumpedRailers do
         end
       end
 
-      context 'with no authorization' do
-        let(:authorized_models) { [] }
-
-        it 'raises RuntimeError' do
-          expect { subject }.to raise_error RuntimeError
+      describe 'with no configuration in prior' do
+        context 'with full authorization' do
+          let(:authorized_models) { :any }
+          it_behaves_like 'successful import'
         end
 
-        it 'does not generate any Author records' do
-          expect { subject rescue nil }.not_to change { Author.count }
+        context 'when authorization granted for all the imported models' do
+          let(:authorized_models) { [Author, Article] }
+          it_behaves_like 'successful import'
         end
 
-        it 'does not generate any Article records' do
-          expect { subject rescue nil }.not_to change { Article.count }
+        context 'when authorization missing for part of the imported models' do
+          let(:authorized_models) { [Author] }
+          it_behaves_like 'import failure'
+        end
+
+        context 'with no authorization specified with argument' do
+          subject { DumpedRailers.import!(*fixtures) }
+          it_behaves_like 'import failure'
+        end
+      end
+
+      context 'when authorized_models are configured in prior' do
+        before do
+          DumpedRailers.configure do |config|
+            config.authorized_models = configuration
+          end
+        end
+
+        context 'when all the models are authorized in configuration' do
+          let(:configuration) { [Author, Article] }
+
+          context 'with full authorization' do
+            let(:authorized_models) { :any }
+            it_behaves_like 'successful import'
+          end
+
+          context 'when authorization granted for all the imported models' do
+            let(:authorized_models) { [Author, Article] }
+            it_behaves_like 'successful import'
+          end
+
+          context 'when authorization missing for part of the imported models' do
+            let(:authorized_models) { [Author] }
+            it_behaves_like 'import failure'
+          end
+
+          context 'with no authorization specified with argument' do
+            subject { DumpedRailers.import!(*fixtures) }
+            it_behaves_like 'successful import'
+          end
+        end
+
+        context 'when some of the models are not authorized in configuration' do
+          let(:configuration) { [Author] }
+
+          context 'with full authorization' do
+            let(:authorized_models) { :any }
+            it_behaves_like 'successful import'
+          end
+
+          context 'when authorization granted for all the imported models' do
+            let(:authorized_models) { [Author, Article] }
+            it_behaves_like 'successful import'
+          end
+
+          context 'when authorization missing for part of the imported models' do
+            let(:authorized_models) { [Author] }
+            it_behaves_like 'import failure'
+          end
+
+          context 'with no authorization specified with argument' do
+            subject { DumpedRailers.import!(*fixtures) }
+            it_behaves_like 'import failure'
+          end
         end
       end
     end
 
     context 'with in-memory fixtures' do
-      subject { DumpedRailers.import!(fixtures, authorized_models: authorized_models) }
-
-      let(:fixtures) {
+      let(:fixtures) { [in_memoery_fixture] }
+      let(:in_memoery_fixture) {
         {
           'authors' => {
             '_fixture' =>
@@ -516,9 +562,7 @@ RSpec.describe DumpedRailers do
         }
       }
 
-      context 'with full authorization' do
-        let(:authorized_models) { :any }
-
+      shared_examples 'successful import' do
         it 'generates corresponding records' do
           expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
         end
@@ -562,21 +606,7 @@ RSpec.describe DumpedRailers do
         end
       end
 
-      context 'when authorization granted for all the imported models' do
-        let(:authorized_models) { [Author, Article] }
-
-        it 'does not raise RuntimeError' do
-          expect { subject }.not_to raise_error
-        end
-
-        it 'generates corresponding records' do
-          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
-        end
-      end
-
-      context 'when authorization missing for part of the imported models' do
-        let(:authorized_models) { [Author] }
-
+      shared_examples 'import failure' do
         it 'raises RuntimeError' do
           expect { subject }.to raise_error RuntimeError
         end
@@ -590,55 +620,81 @@ RSpec.describe DumpedRailers do
         end
       end
 
-      context 'with no authorization' do
-        let(:authorized_models) { [] }
-
-        it 'raises RuntimeError' do
-          expect { subject }.to raise_error RuntimeError
+      describe 'with no configuration in prior' do
+        context 'with full authorization' do
+          let(:authorized_models) { :any }
+          it_behaves_like 'successful import'
         end
 
-        it 'does not generate any Author records' do
-          expect { subject rescue nil }.not_to change { Author.count }
+        context 'when authorization granted for all the imported models' do
+          let(:authorized_models) { [Author, Article] }
+          it_behaves_like 'successful import'
         end
 
-        it 'does not generate any Article records' do
-          expect { subject rescue nil }.not_to change { Article.count }
+        context 'when authorization missing for part of the imported models' do
+          let(:authorized_models) { [Author] }
+          it_behaves_like 'import failure'
+        end
+
+        context 'with no authorization specified with argument' do
+          subject { DumpedRailers.import!(*fixtures) }
+          it_behaves_like 'import failure'
         end
       end
 
       context 'when authorized_models are configured in prior' do
         before do
           DumpedRailers.configure do |config|
-            config.authorized_models = [Author, Article]
+            config.authorized_models = configuration
           end
         end
 
-        let(:authorized_models) { [] }
+        context 'when all the models are authorized in configuration' do
+          let(:configuration) { [Author, Article] }
 
-        it 'does not raise RuntimeError' do
-          expect { subject }.not_to raise_error
-        end
+          context 'with full authorization' do
+            let(:authorized_models) { :any }
+            it_behaves_like 'successful import'
+          end
 
-        it 'generates corresponding records' do
-          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
-        end
-      end
+          context 'when authorization granted for all the imported models' do
+            let(:authorized_models) { [Author, Article] }
+            it_behaves_like 'successful import'
+          end
 
-      context 'when authorized_models are configured partically' do
-        before do
-          DumpedRailers.configure do |config|
-            config.authorized_models = [Author]
+          context 'when authorization missing for part of the imported models' do
+            let(:authorized_models) { [Author] }
+            it_behaves_like 'import failure'
+          end
+
+          context 'with no authorization specified with argument' do
+            subject { DumpedRailers.import!(*fixtures) }
+            it_behaves_like 'successful import'
           end
         end
 
-        let(:authorized_models) { [Article] }
+        context 'when some of the models are not authorized in configuration' do
+          let(:configuration) { [Author] }
 
-        it 'does not raise RuntimeError' do
-          expect { subject }.not_to raise_error
-        end
+          context 'with full authorization' do
+            let(:authorized_models) { :any }
+            it_behaves_like 'successful import'
+          end
 
-        it 'generates corresponding records' do
-          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+          context 'when authorization granted for all the imported models' do
+            let(:authorized_models) { [Author, Article] }
+            it_behaves_like 'successful import'
+          end
+
+          context 'when authorization missing for part of the imported models' do
+            let(:authorized_models) { [Author] }
+            it_behaves_like 'import failure'
+          end
+
+          context 'with no authorization specified with argument' do
+            subject { DumpedRailers.import!(*fixtures) }
+            it_behaves_like 'import failure'
+          end
         end
       end
     end

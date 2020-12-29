@@ -10,7 +10,7 @@ module DumpedRailers
     end
 
     def options
-      config.to_h.deep_dup
+      config.to_h
     end
 
     IGNORABLE_COLUMNS = %w[id created_at updated_at]

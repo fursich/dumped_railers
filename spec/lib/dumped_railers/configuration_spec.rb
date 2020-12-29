@@ -114,14 +114,21 @@ RSpec.describe DumpedRailers::Configuration do
       )
     }
 
-    context 'when options are mutated' do
+    context 'when option values are distructively mutated' do
       subject {
         klass.options[:ignorable_columns] << :published_at
-        klass.options[:a_random_option].upcase!
+        klass.options[:preprocessors] << :baz
       }
 
-      it 'does not change original options' do
-        expect  { subject }.not_to change { klass.options }
+      it 'does updates original configurations' do
+        expect  { subject }.to change { klass.options }.to(
+          {
+            ignorable_columns: [:uuid, :published_at],
+            preprocessors:     [:foo, :bar, :baz],
+            authorized_models: [:model1, :model2],
+            a_random_option:   'something',
+          }
+        )
       end
     end
   end
