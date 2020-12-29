@@ -3,9 +3,13 @@
 module DumpedRailers
   module Preprocessor
     class StripIgnorables
+      def initialize(*ignorable_columns)
+        @ignorable_columns = ignorable_columns.compact.map(&:to_s)
+      end
+
       def call(attributes, _model)
         attributes.reject { |column_name, _v|
-          DumpedRailers.ignorable_columns.map(&:to_s).include?(column_name)
+          @ignorable_columns.include?(column_name)
         }
       end
     end

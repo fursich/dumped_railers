@@ -20,37 +20,60 @@ RSpec.describe DumpedRailers::Preprocessor::StripIgnorables do
     context 'with default config' do
       it  {
         is_expected.to match(
-          'title'     => 'a day in the life',
-          'uuid'      => '428233be-9391-4bf8-8b04-442168c790b7',
-          'tenant_id' => 10,
+          'id'         => 1,
+          'title'      => 'a day in the life',
+          'uuid'       => '428233be-9391-4bf8-8b04-442168c790b7',
+          'tenant_id'  => 10,
+          'created_at' => Time.new(2020, 1, 1),
+          'updated_at' => Time.new(2020, 4, 15),
         )
       }
     end
 
     context 'with different config settings' do
-      around do |example|
-        original_settings = nil
+      subject { described_class.new(*ignorable_columns).call(attributes, model) }
 
-        DumpedRailers.configure do |config|
-          original_settings = config.ignorable_columns
-          config.ignorable_columns = ['uuid', 'tenant_id']
-        end
+      context 'when ignorable columns are specified' do
+        let(:ignorable_columns) { ['uuid', 'tenant_id'] }
 
-        example.run
-
-        DumpedRailers.configure do |config|
-          config.ignorable_columns = original_settings
-        end
+        it  {
+          is_expected.to match(
+            'id'         => 1,
+            'title'      => 'a day in the life',
+            'created_at' => Time.new(2020, 1, 1),
+            'updated_at' => Time.new(2020, 4, 15),
+          )
+        }
       end
 
-      it  {
-        is_expected.to match(
-          'id'         => 1,
-          'title'      => 'a day in the life',
-          'created_at' => Time.new(2020, 1, 1),
-          'updated_at' => Time.new(2020, 4, 15),
-        )
-      }
+      context 'when ignorable columns contains irrelevant column name' do
+        let(:ignorable_columns) { ['uuid', 'published_at', 'archived_at'] }
+
+        it  {
+          is_expected.to match(
+            'id'         => 1,
+            'title'      => 'a day in the life',
+            'tenant_id'  => 10,
+            'created_at' => Time.new(2020, 1, 1),
+            'updated_at' => Time.new(2020, 4, 15),
+          )
+        }
+      end
+
+      context 'when ignorable_columns is nil' do
+        let(:ignorable_columns) { nil }
+
+        it  {
+          is_expected.to match(
+            'id'         => 1,
+            'title'      => 'a day in the life',
+            'uuid'       => '428233be-9391-4bf8-8b04-442168c790b7',
+            'tenant_id'  => 10,
+            'created_at' => Time.new(2020, 1, 1),
+            'updated_at' => Time.new(2020, 4, 15),
+          )
+        }
+      end
     end
   end
 end
