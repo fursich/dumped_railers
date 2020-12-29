@@ -78,24 +78,24 @@ DumpedRailers.import!(fixtures)
 
 DumpedRailers does not save the fixtures when `base_dir` keyword argument is not specified.
 
-### Ignored Columns
+### Ignoring Certain Columns
 
 * By default, DumpedRailers ignore three columns - `id`, `created_at`, `updated_at`. You can always update/change this settings as follows.
 
 ```ruby
 DumpedRailers.configure do |config|
-  config.ignorable_columns += [:published_on] # published_on will be ignored on top of default settings.
+  config.ignorable_columns += [:published_on] # :published_on will be ignored *on top of* default settings.
 end
 ```
 
 * of course you can totally replace the settings with your own.
 ```ruby
 DumpedRailers.configure do |config|
-  config.ignorable_columns = %i[uuid created_on updated_on] # uuid and created_on will be ignored instead of id, created_at, updated_at
+  config.ignorable_columns = %i[uuid created_on updated_on] # :uuid and :created_on will be ignored *instead of* :id, :created_at, :updated_at
 end
 ```
 
-### Masking, filtering
+### Masking, Filtering
 
 * you can pass `preprocessors` to DumpedRailers before it starts dump. All the attributes are filtered through preprocessors in order of registration.
 
@@ -124,7 +124,38 @@ masking_preprocessor = -> (attrs, model) { attrs.transform_values(&:upcase) }
 
 NOTE: The proprocessors must return attributes in the same format `{ attributes_name: value }` so that preprocessors and dump handlers can preprocessors in nested manner.
 
-### pseudo multi-tenancy (such as ActsAsTenant)
+### Limiting Import with Authorized Models Only
+
+* In case you don't want to accept arbitrary fixtures to import, you can limit model access as follows:
+
+```ruby
+DumpedRailers.import!(fixtures, authorized_models: [Item, Price])
+```
+
+This would allow us to import fixtures for items and prices, but reject modification on User, Purchase, Admin data.
+
+NOTE: Only DumpedRailers.import! is affected by this option. DumpedRailers.dump! can't be scoped (at least in the current version).
+
+### Configuration
+
+* All the settings can be configured by either configuration (global) or arguments (at runtime).
+* When you have duplicated setting, arguments are respected: you can always override configured settings by arguments.
+
+```ruby
+DumpedRailers.configure do |config|
+  config.ignorable_columns = [:archived_at]
+  config.preprocessors = [FooPreprocessor, BarPreprocessor]
+end
+
+DumpedRailers.dump!(Item, ignorable_columns: [:id], preprocessors: [BazPreprocessor], base_dir: 'tmp/')
+# this would ignore `id` column, and apply BazPreprocessor only
+
+DumpedRailers.dump!(Price, base_dir: 'tmp/')
+# this would ignore `archived_at`, applies FooPreprocessor and BazPreprocessor
+# (settings provided with arguments are considered as one-off, and don't survive globally)
+```
+
+### Dump/Import under default_scope (e.g. ActsAsTenant)
 
 * Such library builds multi-tenancy environment on one single database, using default_scope to switch over database access rights between tenants. You can incorporate data from Tenant A to Tenant B as follows. let's say we use [ActsAsTenant](https://github.com/ErwinM/acts_as_tenant)
 
