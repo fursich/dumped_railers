@@ -18,7 +18,7 @@ module DumpedRailers
       clear_configuration!(
         ignorable_columns: IGNORABLE_COLUMNS,
         preprocessors:     [],
-        authorized_models: [],
+        authorized_models: :any,
       )
     end
 

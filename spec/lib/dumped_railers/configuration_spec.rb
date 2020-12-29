@@ -56,7 +56,7 @@ RSpec.describe DumpedRailers::Configuration do
       subject { klass.authorized_models }
 
       context 'default' do
-        it { is_expected.to be_empty }
+        it { is_expected.to eq :any }
       end
 
       context 'when configured' do
@@ -154,7 +154,7 @@ RSpec.describe DumpedRailers::Configuration do
     end
 
     it 'resets authorized_models' do
-      expect { subject }.to change { klass.authorized_models }.to []
+      expect { subject }.to change { klass.authorized_models }.to :any
     end
 
     it 'resets other options' do

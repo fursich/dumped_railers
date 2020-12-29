@@ -462,7 +462,7 @@ RSpec.describe DumpedRailers do
 
         context 'with no authorization specified with argument' do
           subject { DumpedRailers.import!(*fixtures) }
-          it_behaves_like 'import failure'
+          it_behaves_like 'successful import'
         end
       end
 
@@ -638,7 +638,7 @@ RSpec.describe DumpedRailers do
 
         context 'with no authorization specified with argument' do
           subject { DumpedRailers.import!(*fixtures) }
-          it_behaves_like 'import failure'
+          it_behaves_like 'successful import'
         end
       end
 
@@ -719,7 +719,7 @@ RSpec.describe DumpedRailers do
 
     describe 'authorized_models' do
       subject { DumpedRailers.authorized_models }
-      it { is_expected.to be_empty }
+      it { is_expected.to eq :any }
     end
   end
 end
