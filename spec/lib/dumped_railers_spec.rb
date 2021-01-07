@@ -698,6 +698,140 @@ RSpec.describe DumpedRailers do
         end
       end
     end
+
+    describe 'callbacks' do
+      subject { DumpedRailers.import!(fixtures, before_save: before_callback, after_save: after_callback) }
+
+      let(:fixtures) {
+        {
+          'authors' => {
+            '_fixture' =>
+              {
+                'model_class'          => 'Author',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            '__author_1' => {
+              'name' => 'William Shakespeare',
+            },
+            '__author_2' => {
+              'name' => 'Shikibu Murasaki',
+            },
+          },
+          'articles'  =>  {
+            '_fixture' =>
+              {
+                'model_class'          => 'Article',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            '__article_1' => {
+              'title'  => 'Romeo and Juliet',
+              'writer' => '__author_1'
+            },
+            '__article_2' => {
+              'title'  => 'King Lear',
+              'writer' => '__author_1'
+            },
+            '__article_3' => {
+              'title'  => 'Genji Monogatari',
+              'writer' => '__author_2'
+            },
+          }
+        }
+      }
+
+      let(:before_callback) { nil }
+      let(:after_callback)  { nil }
+
+      describe 'before_save' do
+        let(:before_callback) {
+          -> (model, records) {
+            if model == Author
+              records.each do |record|
+                record.name = "-- #{record.name} --"
+              end
+            elsif model == Article
+              records.each do |record|
+                record.title = "<< #{record.title} >>"
+              end
+            end
+          }
+        }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
+
+        it 'generates author records' do
+          subject
+
+          expect(Author.all).to contain_exactly(
+            have_attributes(
+              name: '-- William Shakespeare --'
+            ),
+            have_attributes(
+              name: '-- Shikibu Murasaki --'
+            ),
+          )
+        end
+
+        it 'generates article records with proper associations' do
+          subject
+
+          expect(Article.all).to contain_exactly(
+            have_attributes(
+              title: '<< Romeo and Juliet >>',
+              writer: have_attributes(
+                name: '-- William Shakespeare --'
+              ),
+            ),
+            have_attributes(
+              title: '<< King Lear >>',
+              writer: have_attributes(
+                name: '-- William Shakespeare --'
+              ),
+            ),
+            have_attributes(
+              title: '<< Genji Monogatari >>',
+              writer: have_attributes(
+                name: '-- Shikibu Murasaki --'
+              ),
+            ),
+          )
+        end
+      end
+
+      describe 'after_save' do
+        let(:after_callback) {
+          -> (model, records) {
+            persisted_ids[model] = records.map(&:id)
+          }
+        }
+        let(:persisted_ids) { {} }
+
+        it 'does not raise RuntimeError' do
+          expect { subject }.not_to raise_error
+        end
+
+        it 'generates corresponding records' do
+          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+        end
+
+        it 'stores persisted records' do
+          subject
+
+          expect(persisted_ids).to match(
+            {
+              Author  => a_collection_containing_exactly(*Author.all.ids),
+              Article => a_collection_containing_exactly(*Article.all.ids),
+            }
+          )
+        end
+      end
+    end
   end
 
   describe 'version number' do

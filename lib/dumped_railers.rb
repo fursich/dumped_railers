@@ -24,7 +24,7 @@ module DumpedRailers
       fixtures
     end
 
-    def import!(*paths, authorized_models: nil)
+    def import!(*paths, authorized_models: nil, before_save: nil, after_save: nil)
       # make sure class-baseed caches starts with clean state
       DumpedRailers::RecordBuilder::FixtureRow::RecordStore.clear!
       DumpedRailers::RecordBuilder::DependencyTracker.clear!
@@ -32,7 +32,12 @@ module DumpedRailers
       # override global config settings when options are specified
       runtime_options = { authorized_models: authorized_models.presence }.compact.reverse_merge(import_options)
 
-      fixture_handler = Import.new(*paths, authorized_models: runtime_options[:authorized_models])
+      fixture_handler = Import.new(
+        *paths,
+        authorized_models: runtime_options[:authorized_models],
+        before_save: before_save,
+        after_save:  after_save,
+      )
       fixture_handler.import_all!
     end
 
