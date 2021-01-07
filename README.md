@@ -136,6 +136,33 @@ This would allow us to import fixtures for items and prices, but reject modifica
 
 NOTE: Only DumpedRailers.import! is affected by this option. DumpedRailers.dump! can't be scoped (at least in the current version).
 
+
+### Setting Callbacks
+
+* DumpedRailers can accept a `before_save` / `after_save` callbacks with import! method.
+The callback is invoked just before/after each table's records are saved.
+
+```ruby
+before_callback = -> (model, records) {
+  if model == User
+    # set random initial passwords before saving
+    records.each do |user|
+      user.password = user.password_confirmation = SecureRandom.hex(12)
+    end
+  end
+}
+
+after_callback = -> (model, records) {
+  if model == User
+    records.each do |user|
+      user.confirm!
+    end
+  end
+}
+
+DumpedRailers.import!(fixture_path, before_save: before_callback, after_save: after_callback)
+```
+
 ### Configuration
 
 * All the settings can be configured by either configuration (global) or arguments (at runtime).

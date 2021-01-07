@@ -39,3 +39,7 @@
 ### Changed
 - Accept both global configuration as well as runtime (one-off) settings for all the available options.
   Now all the configured settings will be overridden at runtime when the settings are provided with arguments.
+
+## [0.3.0]
+### Added
+- Support `before_save`/`after_save` callbacks with import! method. The callbacks are invoked just before (or after) each table's records are saved.
