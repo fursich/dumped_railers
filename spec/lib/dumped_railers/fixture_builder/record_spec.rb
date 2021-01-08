@@ -107,19 +107,19 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
         it 'receives :call method once' do
           result = subject
 
-          expect(preprocessor1).to have_received(:call).with(record.attributes, Author).once
-          expect(preprocessor2).to have_received(:call).with(record.attributes, Author).once
+          expect(preprocessor1).to have_received(:call).with(Author, record.attributes).once
+          expect(preprocessor2).to have_received(:call).with(Author, record.attributes).once
         end
       end
 
       describe 'order' do
         let(:preprocessor1) {
-          -> (attrs, model) {
+          -> (model, attrs) {
             attrs['name']  = 'Ranpo'
           }
         }
         let(:preprocessor2) {
-          -> (attrs, model) {
+          -> (model, attrs) {
             attrs['name']  += ' Edogawa'
           }
         }

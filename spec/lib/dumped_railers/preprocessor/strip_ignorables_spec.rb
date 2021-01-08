@@ -2,7 +2,7 @@
 
 RSpec.describe DumpedRailers::Preprocessor::StripIgnorables do
   describe '#call' do
-    subject { described_class.new.call(attributes, model) }
+    subject { described_class.new.call(model, attributes) }
 
     let(:attributes) {
       {
@@ -31,7 +31,7 @@ RSpec.describe DumpedRailers::Preprocessor::StripIgnorables do
     end
 
     context 'with different config settings' do
-      subject { described_class.new(*ignorable_columns).call(attributes, model) }
+      subject { described_class.new(*ignorable_columns).call(model, attributes) }
 
       context 'when ignorable columns are specified' do
         let(:ignorable_columns) { ['uuid', 'tenant_id'] }

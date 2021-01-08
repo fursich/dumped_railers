@@ -65,11 +65,11 @@ RSpec.describe DumpedRailers::Dump do
       let(:preprocessors) { [strip_id, upcase_author_name] }
 
       let(:strip_id) {
-        -> (attrs, _model) { attrs.except!('id') }
+        -> (_model, attrs) { attrs.except!('id') }
       }
 
       let(:upcase_author_name) {
-        -> (attrs, _model) {
+        -> (_model, attrs) {
           attrs['name'].upcase! if attrs.has_key? 'name'
         }
       }

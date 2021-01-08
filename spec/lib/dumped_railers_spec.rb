@@ -200,7 +200,7 @@ RSpec.describe DumpedRailers do
 
     context 'with custom preprocessors' do
       let(:masking) {
-        -> (attrs, model) {
+        -> (model, attrs) {
           if model == Author
             attrs.transform_values! { '<MASKED>' }
           end
@@ -208,7 +208,7 @@ RSpec.describe DumpedRailers do
       }
 
       let(:upcasing) {
-        -> (attrs, model) {
+        -> (model, attrs) {
           attrs['title']&.upcase!
         }
       }
