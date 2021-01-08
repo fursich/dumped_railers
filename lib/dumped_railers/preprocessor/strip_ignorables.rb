@@ -8,7 +8,7 @@ module DumpedRailers
       end
 
       def call(attributes, _model)
-        attributes.reject { |column_name, _v|
+        attributes.delete_if { |column_name, _v|
           @ignorable_columns.include?(column_name)
         }
       end

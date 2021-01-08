@@ -201,17 +201,15 @@ RSpec.describe DumpedRailers do
     context 'with custom preprocessors' do
       let(:masking) {
         -> (attrs, model) {
-          attrs.transform_values { |val|
-            model == Author ? '<MASKED>' : val
-          }
+          if model == Author
+            attrs.transform_values! { '<MASKED>' }
+          end
         }
       }
 
       let(:upcasing) {
-        -> (attrs, _model) {
-          attrs.map { |key, val|
-            key == 'title' ? ['upcased_title', val.upcase] : [key, val]
-          }.to_h
+        -> (attrs, model) {
+          attrs['title']&.upcase!
         }
       }
 
@@ -266,15 +264,15 @@ RSpec.describe DumpedRailers do
                   'fixture_generated_by' => 'DumpedRailers',
                 },
               "__article_#{article1.id}" => {
-                'upcased_title'  => article1.title.upcase,
+                'title'  => article1.title.upcase,
                 'writer' => "__author_#{author1.id}",
               },
               "__article_#{article2.id}" => {
-                'upcased_title'  => article2.title.upcase,
+                'title'  => article2.title.upcase,
                 'writer' => "__author_#{author1.id}",
               },
               "__article_#{article3.id}" => {
-                'upcased_title'  => article3.title.upcase,
+                'title'  => article3.title.upcase,
                 'writer' => "__author_#{author2.id}",
               },
             }

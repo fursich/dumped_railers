@@ -42,7 +42,7 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
         let(:author) { Author.create!(name: 'Edgar Allan Poe') }
         let(:record) { Article.create!(title: 'The Murders in the Rue Morgue', writer: author) }
         let(:model)  { Article }
-  
+
         it {
           is_expected.to match(
             'id'     => record.id,
@@ -58,7 +58,7 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
         let(:record)          { ContentHolder.create!(content: pixture_content, article: article) }
         let(:pixture_content) { PictureContent.create!(file: { path: 'foo/bar', filename: 'baz.jpg' }) }
         let(:model)           { ContentHolder }
-  
+
         it {
           is_expected.to match(
             'id'      => record.id,
@@ -72,7 +72,7 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
         let(:record)          { ContentHolder.create!(content: pixture_content) }
         let(:pixture_content) { PictureContent.create!(file: { path: 'foo/bar', filename: 'baz.jpg' }) }
         let(:model)           { ContentHolder }
-  
+
         it {
           is_expected.to match(
             'id'      => record.id,
@@ -100,22 +100,40 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
       let(:model)  { Author }
 
       describe 'interface' do
-        let(:preprocessor1) { double(:preprocessor).tap { |mock| allow(mock).to receive(:call).and_return({processed_by: :preprocessor1}) } }
-        let(:preprocessor2) { double(:preprocessor).tap { |mock| allow(mock).to receive(:call).and_return({processed_by: :preprocessor2}) } }
-        let(:preprocessor3) { double(:preprocessor).tap { |mock| allow(mock).to receive(:call).and_return({processed_by: :preprocessor3}) } }
-        let(:preprocessors) { [preprocessor1, preprocessor2, preprocessor3] }
+        let(:preprocessor1) { double(:preprocessor).tap { |mock| allow(mock).to receive(:call) } }
+        let(:preprocessor2) { double(:preprocessor).tap { |mock| allow(mock).to receive(:call) } }
+        let(:preprocessors) { [preprocessor1, preprocessor2] }
 
         it 'receives :call method once' do
           result = subject
 
           expect(preprocessor1).to have_received(:call).with(record.attributes, Author).once
-          expect(preprocessor2).to have_received(:call).with({ processed_by: :preprocessor1 }, Author).once
-          expect(preprocessor3).to have_received(:call).with({ processed_by: :preprocessor2 }, Author).once
-          expect(result).to contain_exactly("__author_#{record.id}", { processed_by: :preprocessor3 })
+          expect(preprocessor2).to have_received(:call).with(record.attributes, Author).once
         end
       end
 
-      describe 'ignore certain columns' do
+      describe 'order' do
+        let(:preprocessor1) {
+          -> (attrs, model) {
+            attrs['name']  = 'Ranpo'
+          }
+        }
+        let(:preprocessor2) {
+          -> (attrs, model) {
+            attrs['name']  += ' Edogawa'
+          }
+        }
+        let(:preprocessors) { [preprocessor1, preprocessor2] }
+
+        it 'is invoked from first elements to last elements' do
+          expect(subject).to contain_exactly(
+            "__author_#{record.id}",
+            {
+              'id'   => anything,
+              'name' =>'Ranpo Edogawa',
+            },
+          )
+        end
       end
     end
   end

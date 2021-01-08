@@ -11,11 +11,11 @@ module DumpedRailers
 
       def build!
         id = @record.id
-        attributes = 
-          @preprocessors.inject(@record.attributes) { |attrs, preprocessor|
-            preprocessor.call(attrs, @model)
-          }
-  
+        attributes = @record.attributes.deep_dup
+        @preprocessors.each do |preprocessor|
+          preprocessor.call(attributes, @model)
+        end
+
         # convert "belong_to association" foreign keys into record-unique labels
         @model.reflect_on_all_associations.select(&:belongs_to?).each do |rel|
           # skip ignorables
@@ -39,15 +39,15 @@ module DumpedRailers
 
         [record_label_for(@model.name, id), attributes]
       end
-    
+
       private
-  
+
       def record_label_for(class_name, id, type=nil)
         return nil unless id
 
         identifier = "#{class_name.to_s.underscore}_#{id}"
         type_specifier = "(#{type})" if type
-  
+
         "__#{identifier}#{type_specifier}"
       end
     end
