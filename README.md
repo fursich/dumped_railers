@@ -103,15 +103,15 @@ end
 DumpedRailers.dump!(User, Item, base_dir: 'tmp/', preprocessors: [MaskingPreprocessor.new])
 ```
 
-* "Preprocessors" can be lambda, or module, or any objects that can repond to #call(atrs, model).
+* "Preprocessors" can be lambda, or module, or any objects that can repond to #call(model, attributes).
 
 
 ```ruby
 class MaskingPreprocessor
-  def call(attrs, model)
-    attrs.map { |col, value|
-      col.match?(/password/) ? [col, '<MASKED>'] : [col, value]
-    }.to_h
+  def call(model, attrs)
+    attrs.each { |col, _value|
+      attrs[col] = '<MASKED>' if col.match?(/password/)
+    }
   end
 end
 ```
@@ -119,10 +119,12 @@ end
 * a lambda object can be accepted as well
 
 ```ruby
-masking_preprocessor = -> (attrs, model) { attrs.transform_values(&:upcase) }
+masking_preprocessor = -> (model, attrs) { attrs.transform_values!(&:upcase) }
 ```
 
-NOTE: The proprocessors must return attributes in the same format `{ attributes_name: value }` so that preprocessors and dump handlers can preprocessors in nested manner.
+NOTE:
+* In order to reflect changes to the output, **preprocessors must change the attributes destructively**.
+* If you set multiple preprocessors, each preprocessor will be invoked sequentially from left to right, which means your second preprocessor receives attributes only after your first preprocessor update them.
 
 ### Limiting Import with Authorized Models Only
 
