@@ -32,6 +32,9 @@ module DumpedRailers
       # override global config settings when options are specified
       runtime_options = { authorized_models: authorized_models.presence }.compact.reverse_merge(import_options)
 
+      before_save = Array(before_save).compact
+      after_save  = Array(after_save).compact
+
       fixture_handler = Import.new(
         *paths,
         authorized_models: runtime_options[:authorized_models],

@@ -700,7 +700,7 @@ RSpec.describe DumpedRailers do
     end
 
     describe 'callbacks' do
-      subject { DumpedRailers.import!(fixtures, before_save: before_callback, after_save: after_callback) }
+      subject { DumpedRailers.import!(fixtures, before_save: before_callbacks, after_save: after_callbacks) }
 
       let(:fixtures) {
         {
@@ -739,73 +739,144 @@ RSpec.describe DumpedRailers do
         }
       }
 
-      let(:before_callback) { nil }
-      let(:after_callback)  { nil }
+      let(:before_callbacks) { nil }
+      let(:after_callbacks)  { nil }
 
       describe 'before_save' do
-        let(:before_callback) {
-          -> (model, records) {
-            if model == Author
-              records.each do |record|
-                record.name = "-- #{record.name} --"
+        context 'with a single callback' do
+          let(:before_callbacks) { before_callback1 }
+          let(:before_callback1) {
+            -> (model, records) {
+              if model == Author
+                records.each do |record|
+                  record.name = "-- #{record.name} --"
+                end
+              elsif model == Article
+                records.each do |record|
+                  record.title = "<< #{record.title} >>"
+                end
               end
-            elsif model == Article
-              records.each do |record|
-                record.title = "<< #{record.title} >>"
-              end
-            end
+            }
           }
-        }
 
-        it 'does not raise RuntimeError' do
-          expect { subject }.not_to raise_error
-        end
+          it 'does not raise RuntimeError' do
+            expect { subject }.not_to raise_error
+          end
 
-        it 'generates corresponding records' do
-          expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
-        end
+          it 'generates corresponding records' do
+            expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+          end
 
-        it 'generates author records' do
-          subject
+          it 'generates author records' do
+            subject
 
-          expect(Author.all).to contain_exactly(
-            have_attributes(
-              name: '-- William Shakespeare --'
-            ),
-            have_attributes(
-              name: '-- Shikibu Murasaki --'
-            ),
-          )
-        end
-
-        it 'generates article records with proper associations' do
-          subject
-
-          expect(Article.all).to contain_exactly(
-            have_attributes(
-              title: '<< Romeo and Juliet >>',
-              writer: have_attributes(
+            expect(Author.all).to contain_exactly(
+              have_attributes(
                 name: '-- William Shakespeare --'
               ),
-            ),
-            have_attributes(
-              title: '<< King Lear >>',
-              writer: have_attributes(
-                name: '-- William Shakespeare --'
-              ),
-            ),
-            have_attributes(
-              title: '<< Genji Monogatari >>',
-              writer: have_attributes(
+              have_attributes(
                 name: '-- Shikibu Murasaki --'
               ),
-            ),
-          )
+            )
+          end
+
+          it 'generates article records with proper associations' do
+            subject
+
+            expect(Article.all).to contain_exactly(
+              have_attributes(
+                title: '<< Romeo and Juliet >>',
+                writer: have_attributes(
+                  name: '-- William Shakespeare --'
+                ),
+              ),
+              have_attributes(
+                title: '<< King Lear >>',
+                writer: have_attributes(
+                  name: '-- William Shakespeare --'
+                ),
+              ),
+              have_attributes(
+                title: '<< Genji Monogatari >>',
+                writer: have_attributes(
+                  name: '-- Shikibu Murasaki --'
+                ),
+              ),
+            )
+          end
+        end
+
+        context 'with multiple callbacks' do
+          let(:before_callbacks) { [before_callback1, before_callback2] }
+          let(:before_callback1) {
+            -> (model, records) {
+              if model == Author
+                records.each do |record|
+                  record.name = "-- #{record.name} --"
+                end
+              end
+            }
+          }
+          let(:before_callback2) {
+            -> (model, records) {
+              if model == Article
+                records.each do |record|
+                  record.title = "<< #{record.title} >>"
+                end
+              end
+            }
+          }
+
+          it 'does not raise RuntimeError' do
+            expect { subject }.not_to raise_error
+          end
+
+          it 'generates corresponding records' do
+            expect { subject }.to change { Author.count }.by(2).and change { Article.count }.by(3)
+          end
+
+          it 'generates author records' do
+            subject
+
+            expect(Author.all).to contain_exactly(
+              have_attributes(
+                name: '-- William Shakespeare --'
+              ),
+              have_attributes(
+                name: '-- Shikibu Murasaki --'
+              ),
+            )
+          end
+
+          it 'generates article records with proper associations' do
+            subject
+
+            expect(Article.all).to contain_exactly(
+              have_attributes(
+                title: '<< Romeo and Juliet >>',
+                writer: have_attributes(
+                  name: '-- William Shakespeare --'
+                ),
+              ),
+              have_attributes(
+                title: '<< King Lear >>',
+                writer: have_attributes(
+                  name: '-- William Shakespeare --'
+                ),
+              ),
+              have_attributes(
+                title: '<< Genji Monogatari >>',
+                writer: have_attributes(
+                  name: '-- Shikibu Murasaki --'
+                ),
+              ),
+            )
+          end
         end
       end
 
       describe 'after_save' do
-        let(:after_callback) {
+        let(:after_callbacks) {
           -> (model, records) {
             persisted_ids[model] = records.map(&:id)
           }

@@ -6,7 +6,7 @@ module DumpedRailers
   class Import
     attr_reader :fixture_set
 
-    def initialize(*paths, authorized_models: [], before_save: nil, after_save: nil)
+    def initialize(*paths, authorized_models: [], before_save: [], after_save: [])
       @before_save =  before_save
       @after_save  =  after_save
 
@@ -28,11 +28,17 @@ module DumpedRailers
         # models have to be persisted one-by-one so that dependent models are able to 
         # resolve "belongs_to" (parent) association
         @record_sets.each do |model, records|
-          @before_save.call(model, records) if @before_save
+          @before_save.each do |callback|
+            callback.call(model, records)
+          end
+
           # FIXME: faster implementation wanted, parhaps with activerocord-import
           # (objects needs to be reloaded somehow when using buik insert)
           records.each(&:save!)
-          @after_save.call(model, records) if @after_save
+
+          @after_save.each do |callback|
+            callback.call(model, records)
+          end
         end
       end
     end

@@ -552,23 +552,30 @@ RSpec.describe DumpedRailers::Import do
         described_class.new(
           *paths,
           authorized_models: :any,
-          before_save: before_callback,
-          after_save:  after_callback,
+          before_save: before_callbacks,
+          after_save:  after_callbacks,
         )
       }
 
       let(:paths) { ['spec/fixtures/authors.yml', 'spec/fixtures/articles.yml'] }
-      let(:before_callback) { nil }
-      let(:after_callback)  { nil }
+      let(:before_callbacks) { [] }
+      let(:after_callbacks)  { [] }
 
       describe 'before_save' do
-        let(:before_callback) {
+        let(:before_callbacks) { [before_callback1, before_callback2] }
+
+        let(:before_callback1) {
           -> (model, records) {
             if model == Author
               records.each do |record|
                 record.name = "-- #{record.name} --"
               end
-            elsif model == Article
+            end
+          }
+        }
+        let(:before_callback2) {
+          -> (model, records) {
+            if model == Article
               records.each do |record|
                 record.title = "<< #{record.title} >>"
               end
@@ -663,7 +670,17 @@ RSpec.describe DumpedRailers::Import do
       end
 
       describe 'after_save' do
-        let(:after_callback) {
+        let(:after_callbacks) { [after_callback1, after_callback2] }
+        let(:after_callback1) {
+          -> (model, records) {
+            if model == Article
+              persisted_titles[model] = records.map(&:title)
+            end
+          }
+        }
+        let(:persisted_titles) { {} }
+
+        let(:after_callback2) {
           -> (model, records) {
             persisted_ids[model] = records.map(&:id)
           }
@@ -676,6 +693,23 @@ RSpec.describe DumpedRailers::Import do
 
         it 'generates corresponding records' do
           expect { subject }.to change { Author.count }.by(5).and change { Article.count }.by(8)
+        end
+
+        it 'stores persisted records' do
+          subject
+
+          expect(persisted_titles).to match(
+            Article => a_collection_containing_exactly(
+              'Harry Potter',
+              'Princess Mononoke',
+              'Sprited Away',
+              'Alice in Wonderland',
+              'Peter Pan',
+              'The Lord of the Rings',
+              'Phoenix',
+              'Black Jack',
+            )
+          )
         end
 
         it 'stores persisted records' do

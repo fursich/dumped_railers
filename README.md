@@ -139,8 +139,8 @@ NOTE: Only DumpedRailers.import! is affected by this option. DumpedRailers.dump!
 
 ### Setting Callbacks
 
-* DumpedRailers can accept a `before_save` / `after_save` callbacks with import! method.
-The callback is invoked just before/after each table's records are saved.
+* You can set `before_save` / `after_save` callbacks for import! method.
+The callbacks are invoked just before/after each table's records are saved.
 
 ```ruby
 before_callback = -> (model, records) {
@@ -152,7 +152,7 @@ before_callback = -> (model, records) {
   end
 }
 
-after_callback = -> (model, records) {
+after_callback1 = -> (model, records) {
   if model == User
     records.each do |user|
       user.confirm!
@@ -160,8 +160,18 @@ after_callback = -> (model, records) {
   end
 }
 
-DumpedRailers.import!(fixture_path, before_save: before_callback, after_save: after_callback)
+after_callback2 = -> (model, records) {
+  if model == Admin
+    records.each |admin|
+      notify_to_slack(admin.email, admin.name)
+    end
+  end
+}
+
+DumpedRailers.import!(fixture_path, before_save: before_callback, after_save: [after_callback1, after_callback2])
 ```
+
+`before_save` /  `after_save` can accept both single and multiple (array) arguments.
 
 ### Configuration
 
