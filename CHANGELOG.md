@@ -43,3 +43,7 @@
 ## [0.3.0]
 ### Added
 - Support `before_save`/`after_save` callbacks with import! method. The callbacks are invoked just before (or after) each table's records are saved.
+
+## [0.3.0]
+### Added
+- Accept multiple (array) callbacks for `before_save` / `after_save` arguments with DumpedRailers.import!.
