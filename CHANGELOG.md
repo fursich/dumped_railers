@@ -44,6 +44,13 @@
 ### Added
 - Support `before_save`/`after_save` callbacks with import! method. The callbacks are invoked just before (or after) each table's records are saved.
 
-## [0.3.0]
+## [0.3.1]
 ### Added
 - Accept multiple (array) callbacks for `before_save` / `after_save` arguments with DumpedRailers.import!.
+
+## [0.4.0]
+### Changed
+- **BREAKING** preprocessor interface has changed so as that its API have consistency with that of callbacks.
+  - Preprocessors now require arguments (`model`, `attributes`) in this order. Before version < 0.4, it was (`attributes`, `model`)
+  - Attributes needs to be updated destructively within preprocessors. Return values are no longer required reflect the changes.
+
