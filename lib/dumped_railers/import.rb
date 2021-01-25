@@ -31,11 +31,15 @@ module DumpedRailers
           @before_save.each do |callback|
             callback.call(model, records)
           end
+        end
 
+        @record_sets.each do |model, records|
           # FIXME: faster implementation wanted, parhaps with activerocord-import
           # (objects needs to be reloaded somehow when using buik insert)
           records.each(&:save!)
+        end
 
+        @record_sets.each do |model, records|
           @after_save.each do |callback|
             callback.call(model, records)
           end

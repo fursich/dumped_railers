@@ -561,6 +561,60 @@ RSpec.describe DumpedRailers::Import do
       let(:before_callbacks) { [] }
       let(:after_callbacks)  { [] }
 
+      describe 'invocation order' do
+        let(:before_callbacks) { [before_callback] }
+        let(:after_callbacks)  { [after_callback] }
+
+        let(:invocation_logs) { [] }
+        let(:before_callback) {
+          -> (model, _records) {
+            invocation_logs << { before_callback: model }
+          }
+        }
+
+        let(:after_callback) {
+          -> (model, _records) {
+            invocation_logs << { after_callback: model }
+          }
+        }
+
+        before do
+          allow_any_instance_of(Author).to receive(:save!).and_wrap_original { |_m, *_args, **_kwargs|
+            invocation_logs << { save: Author }
+          }
+
+          allow_any_instance_of(Article).to receive(:save!).and_wrap_original { |_m, *_args, **_kwargs|
+            invocation_logs << { save: Article }
+          }
+        end
+
+        it 'finishes before_callbacks BEFORE any records are saved, and fires after_callbacks after ALL the records are saved' do
+          subject
+
+          expect(invocation_logs).to eq(
+            [
+              { before_callback: Author },
+              { before_callback: Article },
+              { save: Author },
+              { save: Author },
+              { save: Author },
+              { save: Author },
+              { save: Author },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { save: Article },
+              { after_callback: Author },
+              { after_callback: Article },
+            ]
+          )
+        end
+      end
+
       describe 'before_save' do
         let(:before_callbacks) { [before_callback1, before_callback2] }
 
