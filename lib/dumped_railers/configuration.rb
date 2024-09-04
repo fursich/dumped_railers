@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'forwardable'
+require 'ostruct'
 module DumpedRailers
   module Configuration
     extend Forwardable
