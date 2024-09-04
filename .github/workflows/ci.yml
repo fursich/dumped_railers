@@ -1,0 +1,26 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        ruby_version: ['3.3', '3.2']
+        rails_version: ['7.2', '7.1', '7.0', '6.1']
+    env:
+      BUNDLE_GEMFILE: gemfiles/Gemfile.rails_${{ matrix.rails_version }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+          bundler-cache: true
+          rubygems: 'latest'
+      - run: bundle exec rake spec
