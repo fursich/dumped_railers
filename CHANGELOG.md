@@ -54,3 +54,11 @@
   - Preprocessors now require arguments (`model`, `attributes`) in this order. Before version < 0.4, it was (`attributes`, `model`)
   - Attributes needs to be updated destructively within preprocessors. Return values are no longer required reflect the changes.
 
+## [0.4.1]
+### Fixed
+- Run all the `before` callbacks before any of the record import starts, `after` callbacks after all the import.
+
+## [0.5.0]
+### Changed
+- require std gems (e.g. ostruct, forwardable). Users of dumped_railers are no longer need to require them.
+- Added CI support against Ruby 3.3, 3.2, together with Rails 7.x, while dropping Ruby < 3.2, Rails < 6.1
