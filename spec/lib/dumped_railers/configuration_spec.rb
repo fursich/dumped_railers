@@ -101,6 +101,7 @@ RSpec.describe DumpedRailers::Configuration do
         config.ignorable_columns = [:uuid]
         config.preprocessors     = [:foo, :bar]
         config.authorized_models = [:model1, :model2]
+        config.yaml_column_permitted_classes = [Date]
         config.a_random_option   = 'something'
       end
     end
@@ -110,6 +111,7 @@ RSpec.describe DumpedRailers::Configuration do
         ignorable_columns: [:uuid],
         preprocessors:     [:foo, :bar],
         authorized_models: [:model1, :model2],
+        yaml_column_permitted_classes: [Date],
         a_random_option:   'something',
       )
     }
@@ -118,6 +120,7 @@ RSpec.describe DumpedRailers::Configuration do
       subject {
         klass.options[:ignorable_columns] << :published_at
         klass.options[:preprocessors] << :baz
+        klass.options[:yaml_column_permitted_classes] << Time
       }
 
       it 'does updates original configurations' do
@@ -126,6 +129,7 @@ RSpec.describe DumpedRailers::Configuration do
             ignorable_columns: [:uuid, :published_at],
             preprocessors:     [:foo, :bar, :baz],
             authorized_models: [:model1, :model2],
+            yaml_column_permitted_classes: [Date, Time],
             a_random_option:   'something',
           }
         )
@@ -141,8 +145,15 @@ RSpec.describe DumpedRailers::Configuration do
         config.ignorable_columns = [:uuid]
         config.preprocessors     = [:foo, :bar]
         config.authorized_models = [:model1, :model2]
+        config.yaml_column_permitted_classes = [Date, Time]
         config.a_random_option   = :something
       end
+    end
+
+    it 'has preset options' do
+      expect { subject }.to change { klass.options.keys }.to contain_exactly(
+        *%i[ignorable_columns preprocessors authorized_models yaml_column_permitted_classes]
+      )
     end
 
     it 'resets ignorable_columns' do
@@ -155,6 +166,10 @@ RSpec.describe DumpedRailers::Configuration do
 
     it 'resets authorized_models' do
       expect { subject }.to change { klass.authorized_models }.to :any
+    end
+
+    it 'resets yaml_column_permitted_classes' do
+      expect { subject }.to change { klass.yaml_column_permitted_classes }.to match_array(ActiveRecord.yaml_column_permitted_classes + [Date Time DateTime])
     end
 
     it 'resets other options' do

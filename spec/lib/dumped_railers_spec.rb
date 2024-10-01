@@ -5,9 +5,9 @@ RSpec.describe DumpedRailers do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
     let!(:author2)  { Author.create!(name: 'Shikibu Murasaki') }
-    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1) }
-    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
-    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
+    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1, published_date: '2020-10-10', published_time: '12:00:00', first_drafted_at: '2020-10-01 12:00:00') }
+    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1, published_date: '2021-10-10', published_time: '12:00:00', first_drafted_at: '2021-10-01 12:00:00') }
+    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2, published_date: '2022-10-10', published_time: '12:00:00', first_drafted_at: '2022-10-01 12:00:00') }
     let(:models)    { [Author, Article] }
 
     describe 'returned values' do
@@ -15,36 +15,65 @@ RSpec.describe DumpedRailers do
 
       it 'returns fixture data composed of record attributes by its model' do
         expect(subject).to match(
-          'authors' => {
+          'authors' =>
+           {
+             '_fixture' =>
+               {
+                 'model_class' => 'Author',
+                 'fixture_generated_by' => 'DumpedRailers',
+               },
+             "__author_#{author1.id}" => {
+               'name' => author1.name
+             },
+             "__author_#{author2.id}" => {
+               'name' => author2.name
+             },
+           },
+          'articles' =>
+          {
             '_fixture' =>
               {
-                'model_class'          => 'Author',
-                'fixture_generated_by' => 'DumpedRailers',
-              },
-            "__author_#{author1.id}" => {
-              'name' => author1.name
-            },
-            "__author_#{author2.id}" => {
-              'name' => author2.name
-            },
-          },
-          'articles'  =>  {
-            '_fixture' =>
-              {
-                'model_class'          => 'Article',
+                'model_class' => 'Article',
                 'fixture_generated_by' => 'DumpedRailers',
               },
             "__article_#{article1.id}" => {
-              'title'  => article1.title,
+              'title' => article1.title,
               'writer' => "__author_#{author1.id}",
+              'published_date' => have_attributes(
+                to_formatted_s: '2020-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2020-10-01 12:00:00')
+              ),
             },
             "__article_#{article2.id}" => {
-              'title'  => article2.title,
+              'title' => article2.title,
               'writer' => "__author_#{author1.id}",
+              'published_date' => have_attributes(
+                to_formatted_s: '2021-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2021-10-01 12:00:00')
+              ),
             },
             "__article_#{article3.id}" => {
-              'title'  => article3.title,
+              'title' => article3.title,
               'writer' => "__author_#{author2.id}",
+              'published_date' => have_attributes(
+                to_formatted_s: '2022-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2022-10-01 12:00:00')
+              ),
             },
           }
         )
@@ -92,7 +121,7 @@ RSpec.describe DumpedRailers do
           expect(File.exist?(fixture_file))
         end
 
-        let(:fixture) { YAML.load_file(fixture_file) }
+        let(:fixture) { YAML.load_file(fixture_file, permitted_classes: described_class.yaml_column_permitted_classes) }
 
         it 'has the same attributes that the original records have' do
           expect(fixture).to match(
@@ -105,14 +134,41 @@ RSpec.describe DumpedRailers do
               "__article_#{article1.id}" => {
                 'title'  => article1.title,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2020-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2020-10-01 12:00:00')
+                ),
               },
               "__article_#{article2.id}" => {
                 'title'  => article2.title,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2021-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2021-10-01 12:00:00')
+                ),
               },
               "__article_#{article3.id}" => {
                 'title'  => article3.title,
                 'writer' => "__author_#{author2.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2022-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2022-10-01 12:00:00')
+                ),
               },
             }
           )
@@ -167,7 +223,7 @@ RSpec.describe DumpedRailers do
           expect(File.exist?(fixture_file))
         end
 
-        let(:fixture) { YAML.load_file(fixture_file) }
+        let(:fixture) { YAML.load_file(fixture_file, permitted_classes: described_class.yaml_column_permitted_classes) }
 
         it 'has upcased attributes' do
           expect(fixture).to match(
@@ -181,16 +237,43 @@ RSpec.describe DumpedRailers do
                 'id' => article1.id,
                 'title'  => article1.title,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2020-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2020-10-01 12:00:00')
+                ),
               },
               "__article_#{article2.id}" => {
                 'id' => article2.id,
                 'title'  => article2.title,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2021-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2021-10-01 12:00:00')
+                ),
               },
               "__article_#{article3.id}" => {
                 'id' => article3.id,
                 'title'  => article3.title,
                 'writer' => "__author_#{author2.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2022-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2022-10-01 12:00:00')
+                ),
               },
             }
           )
@@ -253,7 +336,7 @@ RSpec.describe DumpedRailers do
           expect(File.exist?(fixture_file))
         end
 
-        let(:fixture) { YAML.load_file(fixture_file) }
+        let(:fixture) { YAML.load_file(fixture_file, permitted_classes: described_class.yaml_column_permitted_classes) }
 
         it 'has upcased attributes' do
           expect(fixture).to match(
@@ -266,14 +349,41 @@ RSpec.describe DumpedRailers do
               "__article_#{article1.id}" => {
                 'title'  => article1.title.upcase,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2020-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2020-10-01 12:00:00')
+                ),
               },
               "__article_#{article2.id}" => {
                 'title'  => article2.title.upcase,
                 'writer' => "__author_#{author1.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2021-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2021-10-01 12:00:00')
+                ),
               },
               "__article_#{article3.id}" => {
                 'title'  => article3.title.upcase,
                 'writer' => "__author_#{author2.id}",
+                'published_date' => have_attributes(
+                  to_formatted_s: '2022-10-10'
+                ),
+                'published_time' => have_attributes(
+                  to_formatted_s: a_string_including('12:00:00')
+                ),
+                'first_drafted_at' => have_attributes(
+                  to_formatted_s: a_string_including('2022-10-01 12:00:00')
+                ),
               },
             }
           )
