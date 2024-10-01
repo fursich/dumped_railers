@@ -62,3 +62,9 @@
 ### Changed
 - require std gems (e.g. ostruct, forwardable). Users of dumped_railers are no longer need to require them.
 - Added CI support against Ruby 3.3, 3.2, together with Rails 7.x, while dropping Ruby < 3.2, Rails < 6.1
+
+## [0.6.0]
+### Added
+- Add new options to explicitly allow specific classes for YAML import.
+### Changed
+- Accept Date, Time, DateTIme together with the classes that are set as ActiveRecord.yaml_column_permitted_classes be default.
