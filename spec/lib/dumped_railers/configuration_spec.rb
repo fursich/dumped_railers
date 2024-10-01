@@ -168,8 +168,14 @@ RSpec.describe DumpedRailers::Configuration do
       expect { subject }.to change { klass.authorized_models }.to :any
     end
 
-    it 'resets yaml_column_permitted_classes' do
-      expect { subject }.to change { klass.yaml_column_permitted_classes }.to match_array(ActiveRecord.yaml_column_permitted_classes + [Date Time DateTime])
+    if ActiveRecord.respond_to?(:yaml_column_permitted_classes)
+      it 'resets yaml_column_permitted_classes' do
+        expect { subject }.to change { klass.yaml_column_permitted_classes }.to match_array(ActiveRecord.yaml_column_permitted_classes + [Date, Time, DateTime])
+      end
+    else
+      it 'resets yaml_column_permitted_classes' do
+        expect { subject }.to change { klass.yaml_column_permitted_classes }.to match_array([Date, Time, DateTime])
+      end
     end
 
     it 'resets other options' do
