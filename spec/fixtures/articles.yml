@@ -5,12 +5,21 @@ _fixture:
 __article_36:
   title: Phoenix
   writer: __author_5
+  published_date: 2024-04-01
+  published_time: '10:30:00'
+  first_drafted_at: 2024-02-01T12:12:12
 __article_52:
   title: Harry Potter
   writer: __author_4
+  published_date: 2024-03-01
+  published_time: '10:00:00'
+  first_drafted_at: 2024-02-01T10:10:10+09:00
 __article_143:
   title: Princess Mononoke
   writer: __author_13
+  published_date: 2024-05-01
+  published_time: '09:00:00'
+  first_drafted_at: 2024-02-01T08:08:08-05:00
 __article_88:
   title: Alice in Wonderland
   writer: __author_83
