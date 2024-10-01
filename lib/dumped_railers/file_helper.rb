@@ -5,7 +5,7 @@ require "yaml"
 module DumpedRailers
   module FileHelper
     class << self
-      def read_fixtures(*paths)
+      def read_fixtures(*paths, yaml_column_permitted_classes: [])
         yaml_files = paths.flat_map { |path|
           if File.file?(path)
             path
@@ -18,7 +18,7 @@ module DumpedRailers
 
         yaml_files.map { |file| 
           raw_data = ::File.read(file)
-          YAML.load(raw_data)
+          YAML.safe_load(raw_data, permitted_classes: yaml_column_permitted_classes)
         }
       end
 

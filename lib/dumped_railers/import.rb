@@ -6,14 +6,14 @@ module DumpedRailers
   class Import
     attr_reader :fixture_set
 
-    def initialize(*paths, authorized_models: [], before_save: [], after_save: [])
+    def initialize(*paths, authorized_models: [], before_save: [], after_save: [], yaml_column_permitted_classes: [])
       @before_save =  before_save
       @after_save  =  after_save
 
       if (paths.first.is_a? Hash)
         @raw_fixtures = paths.first.values
       else
-        @raw_fixtures = FileHelper.read_fixtures(*paths)
+        @raw_fixtures = FileHelper.read_fixtures(*paths, yaml_column_permitted_classes: yaml_column_permitted_classes)
       end
 
       @fixture_set = RecordBuilder::FixtureSet.new(@raw_fixtures, authorized_models: authorized_models)

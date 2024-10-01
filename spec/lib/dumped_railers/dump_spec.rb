@@ -7,9 +7,9 @@ RSpec.describe DumpedRailers::Dump do
 
     let!(:author1)  { Author.create!(name: 'William Shakespeare') }
     let!(:author2)  { Author.create!(name: 'Shikibu Murasaki') }
-    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1) }
-    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1) }
-    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2) }
+    let!(:article1) { Article.create!(title: 'Romeo and Juliet', writer: author1, published_date: '2020-10-10', published_time: '12:00:00', first_drafted_at: '2020-10-01 12:00:00') }
+    let!(:article2) { Article.create!(title: 'King Lear',        writer: author1, published_date: '2021-10-10', published_time: '12:00:00', first_drafted_at: '2021-10-01 12:00:00') }
+    let!(:article3) { Article.create!(title: 'Genji Monogatari', writer: author2, published_date: '2022-10-10', published_time: '12:00:00', first_drafted_at: '2022-10-01 12:00:00') }
     let(:models)    { [Author, Article] }
 
     context 'without any preprocessors' do
@@ -19,42 +19,69 @@ RSpec.describe DumpedRailers::Dump do
         is_expected.to match(
           'authors' =>
            {
-            '_fixture' =>
-              {
-                'model_class'          => 'Author',
-                'fixture_generated_by' => 'DumpedRailers',
-              },
-            "__author_#{author1.id}" => {
-               'id'   => author1.id,
+             '_fixture' =>
+               {
+                 'model_class' => 'Author',
+                 'fixture_generated_by' => 'DumpedRailers',
+               },
+             "__author_#{author1.id}" => {
+               'id' => author1.id,
                'name' => author1.name
-              },
-            "__author_#{author2.id}" => {
-               'id'   => author2.id,
+             },
+             "__author_#{author2.id}" => {
+               'id' => author2.id,
                'name' => author2.name
-              },
-          },
+             },
+           },
           'articles' =>
           {
-           '_fixture' =>
-             {
-               'model_class'          => 'Article',
-               'fixture_generated_by' => 'DumpedRailers',
-             },
-           "__article_#{article1.id}" => {
-              'id'     => article1.id,
-              'title'  => article1.title,
+            '_fixture' =>
+              {
+                'model_class' => 'Article',
+                'fixture_generated_by' => 'DumpedRailers',
+              },
+            "__article_#{article1.id}" => {
+              'id' => article1.id,
+              'title' => article1.title,
               'writer' => "__author_#{author1.id}",
-             },
-           "__article_#{article2.id}" => {
-              'id'     => article2.id,
-              'title'  => article2.title,
+              'published_date' => have_attributes(
+                to_formatted_s: '2020-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2020-10-01 12:00:00')
+              ),
+            },
+            "__article_#{article2.id}" => {
+              'id' => article2.id,
+              'title' => article2.title,
               'writer' => "__author_#{author1.id}",
-             },
-           "__article_#{article3.id}" => {
-              'id'     => article3.id,
-              'title'  => article3.title,
+              'published_date' => have_attributes(
+                to_formatted_s: '2021-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2021-10-01 12:00:00')
+              ),
+            },
+            "__article_#{article3.id}" => {
+              'id' => article3.id,
+              'title' => article3.title,
               'writer' => "__author_#{author2.id}",
-             },
+              'published_date' => have_attributes(
+                to_formatted_s: '2022-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2022-10-01 12:00:00')
+              ),
+            },
           }
         )
       }
@@ -78,37 +105,64 @@ RSpec.describe DumpedRailers::Dump do
         is_expected.to match(
           'authors' =>
            {
-            '_fixture' =>
-              {
-                'model_class'          => 'Author',
-                'fixture_generated_by' => 'DumpedRailers',
-              },
-            "__author_#{author1.id}" => {
+             '_fixture' =>
+               {
+                 'model_class' => 'Author',
+                 'fixture_generated_by' => 'DumpedRailers',
+               },
+             "__author_#{author1.id}" => {
                'name' => author1.name.upcase
-              },
-            "__author_#{author2.id}" => {
+             },
+             "__author_#{author2.id}" => {
                'name' => author2.name.upcase
-              },
-          },
+             },
+           },
           'articles' =>
           {
-           '_fixture' =>
-             {
-               'model_class'          => 'Article',
-               'fixture_generated_by' => 'DumpedRailers',
-             },
-           "__article_#{article1.id}" => {
-              'title'  => article1.title,
+            '_fixture' =>
+            {
+              'model_class' => 'Article',
+              'fixture_generated_by' => 'DumpedRailers',
+            },
+            "__article_#{article1.id}" => {
+              'title' => article1.title,
               'writer' => "__author_#{author1.id}",
-             },
-           "__article_#{article2.id}" => {
-              'title'  => article2.title,
+              'published_date' => have_attributes(
+                to_formatted_s: '2020-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2020-10-01 12:00:00')
+              ),
+            },
+            "__article_#{article2.id}" => {
+              'title' => article2.title,
               'writer' => "__author_#{author1.id}",
-             },
-           "__article_#{article3.id}" => {
-              'title'  => article3.title,
+              'published_date' => have_attributes(
+                to_formatted_s: '2021-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2021-10-01 12:00:00')
+              ),
+            },
+            "__article_#{article3.id}" => {
+              'title' => article3.title,
               'writer' => "__author_#{author2.id}",
-             },
+              'published_date' => have_attributes(
+                to_formatted_s: '2022-10-10'
+              ),
+              'published_time' => have_attributes(
+                to_formatted_s: a_string_including('12:00:00')
+              ),
+              'first_drafted_at' => have_attributes(
+                to_formatted_s: a_string_including('2022-10-01 12:00:00')
+              ),
+            },
           }
         )
       }

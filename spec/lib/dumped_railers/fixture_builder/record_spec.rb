@@ -40,14 +40,21 @@ RSpec.describe DumpedRailers::FixtureBuilder::Record do
 
       context 'when the record has a direct reference (using primary_key)' do
         let(:author) { Author.create!(name: 'Edgar Allan Poe') }
-        let(:record) { Article.create!(title: 'The Murders in the Rue Morgue', writer: author) }
+        let(:record) { Article.create!(title: 'The Murders in the Rue Morgue', writer: author, published_date: '2020-01-01', published_time: '12:00:00') }
         let(:model)  { Article }
 
         it {
           is_expected.to match(
-            'id'     => record.id,
-            'title'  => 'The Murders in the Rue Morgue',
-            'writer' => "__author_#{author.id}"
+            'id' => record.id,
+            'title' => 'The Murders in the Rue Morgue',
+            'writer' => "__author_#{author.id}",
+            'published_date' => have_attributes(
+              to_formatted_s: '2020-01-01'
+            ),
+            'published_time' => have_attributes(
+              to_formatted_s: a_string_including('12:00:00')
+            ),
+            'first_drafted_at' => nil,
           )
         }
       end

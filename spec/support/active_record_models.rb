@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ActiveRecord::Schema.define(version: Time.now) do
   create_table :authors, force: true do |t|
     t.string     :name, null: false
@@ -6,6 +8,9 @@ ActiveRecord::Schema.define(version: Time.now) do
   create_table :articles, force: true do |t|
     t.references :author
     t.string     :title, null: false
+    t.date       :published_date
+    t.time       :published_time
+    t.datetime   :first_drafted_at
   end
 
   create_table :content_holders, force: true do |t|
