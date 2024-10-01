@@ -5,7 +5,7 @@ require 'ostruct'
 module DumpedRailers
   module Configuration
     extend Forwardable
-    def_delegators :@_config, :preprocessors, :ignorable_columns, :authorized_models
+    def_delegators :@_config, :preprocessors, :ignorable_columns, :authorized_models, :yaml_column_permitted_classes
 
     def configure
       yield config
@@ -19,8 +19,9 @@ module DumpedRailers
     def configure_defaults!
       clear_configuration!(
         ignorable_columns: IGNORABLE_COLUMNS,
-        preprocessors:     [],
+        preprocessors: [],
         authorized_models: :any,
+        yaml_column_permitted_classes: ActiveRecord.yaml_column_permitted_classes + [Date, Time, DateTime]
       )
     end
 

@@ -24,13 +24,19 @@ module DumpedRailers
       fixtures
     end
 
-    def import!(*paths, authorized_models: nil, before_save: nil, after_save: nil)
+    def import!(*paths, authorized_models: nil, before_save: nil, after_save: nil, yaml_column_permitted_classes: [])
       # make sure class-baseed caches starts with clean state
       DumpedRailers::RecordBuilder::FixtureRow::RecordStore.clear!
       DumpedRailers::RecordBuilder::DependencyTracker.clear!
 
       # override global config settings when options are specified
-      runtime_options = { authorized_models: authorized_models.presence }.compact.reverse_merge(import_options)
+      runtime_options = 
+        {
+          authorized_models: authorized_models.presence,
+          yaml_column_permitted_classes: yaml_column_permitted_classes.presence,
+        }
+        .compact
+        .reverse_merge(import_options)
 
       before_save = Array(before_save).compact
       after_save  = Array(after_save).compact
@@ -40,6 +46,7 @@ module DumpedRailers
         authorized_models: runtime_options[:authorized_models],
         before_save: before_save,
         after_save:  after_save,
+        yaml_column_permitted_classes: runtime_options[:yaml_column_permitted_classes]
       )
       fixture_handler.import_all!
     end
@@ -55,7 +62,7 @@ module DumpedRailers
     end
 
     def import_options
-      options.slice(:authorized_models)
+      options.slice(:authorized_models, :yaml_column_permitted_classes)
     end
   end
 
