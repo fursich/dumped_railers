@@ -175,6 +175,48 @@ DumpedRailers.import!(fixture_path, before_save: before_callback, after_save: [a
 
 `before_save` /  `after_save` can accept both single and multiple (array) arguments.
 
+### Deserializing Custom Classes with YAML
+
+* YAML (Psych) does not permit to load random class objects for [security reasons](https://discuss.rubyonrails.org/t/cve-2022-32224-possible-rce-escalation-bug-with-serialized-columns-in-active-record/81017).
+* By default, DumpedRailers handles all the objects that Rails permitts (i.e. [ActiveRecord.yaml_column_permitted_classes](https://guides.rubyonrails.org/configuring.html#config-active-record-yaml-column-permitted-classes)), plus Time, Date, and DateTime.
+* DumpedRailers raises `Psych::DisallowedClass` error when non-permitted classes are detected. If you want DumpedRailsers handle other classes, you could specify `yaml_column_permitted_classes` option with configurations or import method's arguments.
+* *Please use this option with extra care* for security - again, it is recommended to use this for development purpose only.
+
+```ruby
+DumpedRailers.configure do |config|
+  config.ignorable_columns += [:published_on] # :published_on will be ignored *on top of* default settings.
+end
+```
+
+#### Caveats
+* If you wish to load Date, Time object, it would be easier to load it as a string. DumpedRailers will pass it to the specified ActiveRecord models and they typecast the raw string into the appropreate date/time object.
+
+* below columns (published_date, published_time, first_drafted_at) all will be passed as a string (as the value is surrounded by the quotes). Strings will be interperted to apropreate column type with ActiveRecord.
+
+```ruby
+_fixture:
+  model_class: Article
+  fixture_generated_by: DumpedRailers
+__article_1:
+  title: Harry Potter
+  published_date: '2024-03-01'
+  published_time: '10:00:00'
+  first_drafted_at: '2024-02-01T10:10:10+09:00'
+```
+
+* below fixture (without quotes) will be directly interperted to Date or Time via YAML module. It needs to have proper format that YAML can interpret.
+
+```ruby
+_fixture:
+  model_class: Article
+  fixture_generated_by: DumpedRailers
+__article_1:
+  title: Harry Potter
+  published_date: 2024-03-01
+  published_time: 2000-01-01 10:00:00
+  first_drafted_at: 2024-02-01T10:10:10+09:00
+```
+
 ### Configuration
 
 * All the settings can be configured by either configuration (global) or arguments (at runtime).
